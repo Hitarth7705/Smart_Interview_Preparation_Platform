@@ -1,71 +1,94 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Register</title>
-    <style>
-        body {
-            font-family: Arial;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        .card {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            width: 300px;
-            text-align: center;
-        }
-        input {
-            width: 100%;
-            padding: 10px;
-            margin: 8px 0;
-        }
-        button {
-            width: 100%;
-            padding: 10px;
-            background: #667eea;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        a { text-decoration: none; }
-    </style>
+  <title>Register</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .card {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      width: 300px;
+      text-align: center;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 5px;
+    }
+    a { text-decoration: none; }
+    #errorMsg {
+      color: red;
+      font-size: 14px;
+      min-height: 20px;
+    }
+  </style>
 </head>
 <body>
 
 <div class="card">
-    <h2>Register</h2>
-    <input type="text" id="name" placeholder="Name">
-    <input type="email" id="email" placeholder="Email">
-    <input type="password" id="password" placeholder="Password">
-    <button onclick="register()">Register</button>
-    <p>Already have account? <a href="login.html">Login</a></p>
+  <h2>Register</h2>
+  <input type="text" id="name" placeholder="Name">
+  <input type="email" id="email" placeholder="Email">
+  <input type="password" id="password" placeholder="Password">
+  <p id="errorMsg"></p>
+  <button onclick="register()">Register</button>
+  <p>Already have account? <a href="login.html">Login</a></p>
 </div>
 
 <script>
 async function register() {
-    const name = document.getElementById("name").value;
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
+  const name = document.getElementById("name").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const errorMsg = document.getElementById("errorMsg");
+  errorMsg.textContent = "";
 
+  if (!name || !email || !password) {
+    errorMsg.textContent = "Please fill in all fields.";
+    return;
+  }
+
+  try {
     const response = await fetch("http://localhost:5000/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password })
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, password })
     });
 
     const data = await response.json();
 
     if (response.status === 201) {
-        localStorage.setItem("token", data.token);
-        alert("Registration successful! Please login.");
-        window.location.href = "login.html";
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user)); // save user info
+      window.location.href = "dashboard.html"; // go straight to dashboard
     } else {
-        alert(data.message);  // shows actual error like "Email already registered"
+      errorMsg.textContent = data.message || "Registration failed.";
     }
+  } catch (err) {
+    errorMsg.textContent = "Could not connect to server.";
+  }
 }
 </script>
 

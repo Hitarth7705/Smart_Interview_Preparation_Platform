@@ -1,70 +1,91 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Login</title>
-    <style>
-        body {
-            font-family: Arial;
-            background: linear-gradient(135deg, #11998e, #38ef7d);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        .card {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            width: 300px;
-            text-align: center;
-        }
-        input {
-            width: 100%;
-            padding: 10px;
-            margin: 8px 0;
-        }
-        button {
-            width: 100%;
-            padding: 10px;
-            background: #11998e;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-    </style>
+  <title>Login</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: linear-gradient(135deg, #11998e, #38ef7d);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .card {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      width: 300px;
+      text-align: center;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background: #11998e;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 5px;
+    }
+    #errorMsg {
+      color: red;
+      font-size: 14px;
+      min-height: 20px;
+    }
+  </style>
 </head>
 <body>
 
 <div class="card">
-    <h2>Login</h2>
-    <input type="email" id="email" placeholder="Email">
-    <input type="password" id="password" placeholder="Password">
-    <button onclick="login()">Login</button>
-    <p>No account? <a href="register.html">Register</a></p>
+  <h2>Login</h2>
+  <input type="email" id="email" placeholder="Email">
+  <input type="password" id="password" placeholder="Password">
+  <p id="errorMsg"></p>
+  <button onclick="login()">Login</button>
+  <p>No account? <a href="register.html">Register</a></p>
 </div>
 
 <script>
 async function login() {
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const errorMsg = document.getElementById("errorMsg");
+  errorMsg.textContent = "";
 
+  if (!email || !password) {
+    errorMsg.textContent = "Please fill in all fields.";
+    return;
+  }
+
+  try {
     const response = await fetch("http://localhost:5000/api/auth/login", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ email, password })
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
     });
 
     const data = await response.json();
 
     if (response.ok) {
-        localStorage.setItem("token", data.token);
-        alert("Login successful");
-        window.location.href = "dashboard.html";
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user)); // save user info
+      window.location.href = "dashboard.html";
     } else {
-        alert(data.message);
+      errorMsg.textContent = data.message || "Login failed.";
     }
+  } catch (err) {
+    errorMsg.textContent = "Could not connect to server.";
+  }
 }
 </script>
 
