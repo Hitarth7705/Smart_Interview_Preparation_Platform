@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -40,6 +40,17 @@ export default function Dashboard() {
             <h3 style={styles.cardTitle}>Streak</h3>
             <p style={styles.cardValue}>10 Days</p>
           </div>
+        </div>
+
+        {/* Interview Questions Link Card */}
+        <div style={styles.section}>
+          <h3 style={{ margin: "0 0 12px" }}>📚 Interview Questions</h3>
+          <p style={{ margin: "0 0 16px", color: "#555", fontSize: 14 }}>
+            Practice 50 curated interview questions across JavaScript, React, Data Structures, Algorithms, and more.
+          </p>
+          <Link to="/questions" style={styles.questionsBtn}>
+            Open Interview Questions →
+          </Link>
         </div>
 
         {/* Recent Activity */}
@@ -93,5 +104,16 @@ const styles = {
     borderRadius: "10px",
     marginBottom: "20px",
     boxShadow: "0px 2px 5px rgba(0,0,0,0.1)",
+  },
+  questionsBtn: {
+    display: "inline-block",
+    padding: "10px 22px",
+    background: "linear-gradient(135deg, #11998e, #38ef7d)",
+    color: "white",
+    textDecoration: "none",
+    borderRadius: "8px",
+    fontWeight: "700",
+    fontSize: "14px",
+    boxShadow: "0 2px 8px rgba(17,153,142,0.25)",
   },
 };
