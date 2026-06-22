@@ -1,11 +1,23 @@
 const express = require("express");
+const jwt = require("jsonwebtoken");
 const InterviewQuestion = require("../models/InterviewQuestion");
+const User = require("../models/User");
 
 const router = express.Router();
 
+// Middleware: optionally decode user from token (non-blocking)
+function getUser(req, res, next) {
+  const auth = req.headers.authorization;
+  if (auth && auth.startsWith("Bearer ")) {
+    try {
+      req.userId = jwt.verify(auth.slice(7), process.env.JWT_SECRET).id;
+    } catch (_) {}
+  }
+  next();
+}
+
 // GET /api/questions — get all questions (with optional filters)
-// Query params: category, difficulty, tags
-router.get("/", async (req, res) => {
+router.get("/", getUser, async (req, res) => {
   try {
     const filter = {};
     if (req.query.category) filter.category = req.query.category;
@@ -19,8 +31,20 @@ router.get("/", async (req, res) => {
   }
 });
 
+// POST /api/questions/seen/:questionNumber — mark a question as seen
+router.post("/seen/:questionNumber", getUser, async (req, res) => {
+  try {
+    if (!req.userId) return res.status(401).json({ message: "Login required" });
+    const num = Number(req.params.questionNumber);
+    await User.findByIdAndUpdate(req.userId, { $addToSet: { seenQuestions: num } });
+    res.json({ message: "Marked as seen" });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
 // GET /api/questions/random — get a random question (optional category filter)
-router.get("/random", async (req, res) => {
+router.get("/random", getUser, async (req, res) => {
   try {
     const filter = {};
     if (req.query.category) filter.category = req.query.category;
@@ -38,7 +62,7 @@ router.get("/random", async (req, res) => {
 });
 
 // GET /api/questions/:id — get a single question by questionNumber
-router.get("/:id", async (req, res) => {
+router.get("/:id", getUser, async (req, res) => {
   try {
     const question = await InterviewQuestion.findOne({ questionNumber: req.params.id });
     if (!question) return res.status(404).json({ message: "Question not found" });

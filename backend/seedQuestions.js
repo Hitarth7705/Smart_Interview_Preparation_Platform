@@ -1,6 +1,6 @@
-// Run this script once to seed the database:
-//   cd backend
-//   node seedQuestions.js
+const dns = require('dns');
+dns.setDefaultResultOrder('ipv4first');
+dns.setServers(['8.8.8.8', '8.8.4.4']);
 
 require("dotenv").config();
 const mongoose = require("mongoose");
@@ -10,17 +10,13 @@ const questions = require("./data/questionsData");
 
 const seed = async () => {
   await connectDB();
-
   try {
-    // Clear existing data
     await InterviewQuestion.deleteMany({});
     console.log("🗑️  Cleared existing interview questions.");
 
-    // Insert all 50 questions
     const inserted = await InterviewQuestion.insertMany(questions);
     console.log(`✅  Seeded ${inserted.length} interview questions successfully!`);
 
-    // Summary by category
     const summary = await InterviewQuestion.aggregate([
       { $group: { _id: "$category", count: { $sum: 1 } } },
       { $sort: { _id: 1 } },

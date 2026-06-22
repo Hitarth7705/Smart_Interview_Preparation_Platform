@@ -7,6 +7,8 @@ const cors = require("cors");
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const questionRoutes = require("./routes/questionRoutes");
+const dsaRoutes = require("./routes/dsaRoutes");
+const profileRoutes = require("./routes/profileRoutes");
 
 connectDB();
 
@@ -16,6 +18,8 @@ app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/questions", questionRoutes);
+app.use("/api/dsa", dsaRoutes);
+app.use("/api/profile", profileRoutes);
 
 app.get("/", (req, res) => {
   res.send("API Running...");

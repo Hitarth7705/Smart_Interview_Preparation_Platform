@@ -54,6 +54,26 @@ export default function Questions() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [activeDifficulty, setActiveDifficulty] = useState("All");
 
+  // Seen tracking
+  const [seenSet, setSeenSet] = useState(() => {
+    try { return new Set(JSON.parse(localStorage.getItem("questionsSeen") || "[]")); }
+    catch { return new Set(); }
+  });
+
+  const markSeen = useCallback(async (questionNumber) => {
+    if (seenSet.has(questionNumber)) return;
+    const newSet = new Set(seenSet).add(questionNumber);
+    setSeenSet(newSet);
+    localStorage.setItem("questionsSeen", JSON.stringify([...newSet]));
+    const token = localStorage.getItem("token");
+    try {
+      await fetch(`${API}/seen/${questionNumber}`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    } catch (_) {}
+  }, [seenSet]);
+
   // ── Fetch all questions once ──────────────────────────────────
   useEffect(() => {
     if (!localStorage.getItem("token")) {
@@ -62,7 +82,8 @@ export default function Questions() {
     }
     const load = async () => {
       try {
-        const res = await fetch(API);
+        const token = localStorage.getItem("token");
+        const res = await fetch(API, { headers: { Authorization: `Bearer ${token}` } });
         const data = await res.json();
         if (res.ok) {
           setQuestions(data.questions);
@@ -131,6 +152,13 @@ export default function Questions() {
     if (e.key === "Enter") handleSearch();
   };
 
+  // Mark seen when card changes
+  useEffect(() => {
+    if (filtered.length > 0 && filtered[currentIndex]) {
+      markSeen(filtered[currentIndex].questionNumber);
+    }
+  }, [currentIndex, filtered, markSeen]);
+
   // ── Navigation ────────────────────────────────────────────────
   const goTo = (idx) => {
     setCurrentIndex(idx);
@@ -158,8 +186,13 @@ export default function Questions() {
         <div style={s.navLeft}>
           <span style={s.navLogo}>⚡ Smart Interview Prep</span>
           <Link to="/dashboard" style={s.navLink}>Dashboard</Link>
+          <Link to="/dsa"       style={s.navLink}>DSA</Link>
+          <Link to="/profile"   style={s.navLink}>Profile</Link>
+          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+          <span style={{ color: "#94a3b8", fontSize: 13 }}>👁️ {seenSet.size} seen</span>
+          <button style={s.logoutBtn} onClick={handleLogout}>Logout</button>
+          </div>
         </div>
-        <button style={s.logoutBtn} onClick={handleLogout}>Logout</button>
       </nav>
 
       <div style={s.wrapper}>

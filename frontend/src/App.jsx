@@ -4,6 +4,8 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import ForgotPassword from "./pages/ForgotPassword";
 import Questions from "./pages/Questions";
+import DSA from "./pages/DSA";
+import Profile from "./pages/Profile";
 
 function App() {
   return (
@@ -15,6 +17,8 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/questions" element={<Questions />} />
+        <Route path="/dsa" element={<DSA />} />
+        <Route path="/profile" element={<Profile />} />
       </Routes>
     </BrowserRouter>
   );

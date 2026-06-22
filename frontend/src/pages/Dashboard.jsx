@@ -1,17 +1,38 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+
+const API = "http://localhost:5000/api/profile";
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const [stats, setStats] = useState(null);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    if (!localStorage.getItem("token")) {
-      navigate("/login");
-    }
+    const token = localStorage.getItem("token");
+    if (!token) { navigate("/login"); return; }
+
+    // Try to load stored user info immediately
+    try {
+      const stored = JSON.parse(localStorage.getItem("user") || "{}");
+      if (stored.name) setUser(stored);
+    } catch (_) {}
+
+    // Fetch live stats from profile API
+    fetch(API, { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.user) {
+          setUser(data.user);
+          setStats(data);
+        }
+      })
+      .catch(() => {});
   }, [navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
     navigate("/login");
   };
 
@@ -20,47 +41,68 @@ export default function Dashboard() {
       {/* Navbar */}
       <div style={styles.navbar}>
         <h2 style={{ margin: 0 }}>Smart Interview Prep</h2>
-        <button style={styles.logoutBtn} onClick={handleLogout}>Logout</button>
+        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+          <Link to="/profile" style={styles.profileBtn}>👤 Profile</Link>
+          <button style={styles.logoutBtn} onClick={handleLogout}>Logout</button>
+        </div>
       </div>
 
       <div style={styles.container}>
-        <h2>Welcome to Dashboard 🎉</h2>
+        <h2>Welcome{user ? `, ${user.name}` : ""} 🎉</h2>
 
         {/* Stats Cards */}
         <div style={styles.cards}>
           <div style={styles.card}>
-            <h3 style={styles.cardTitle}>Problems Solved</h3>
-            <p style={styles.cardValue}>120</p>
+            <h3 style={styles.cardTitle}>Questions Seen</h3>
+            <p style={styles.cardValue}>
+              {stats ? `${stats.questions.seen} / ${stats.questions.total}` : "—"}
+            </p>
           </div>
           <div style={styles.card}>
-            <h3 style={styles.cardTitle}>Mock Interviews</h3>
-            <p style={styles.cardValue}>5</p>
+            <h3 style={styles.cardTitle}>DSA Seen</h3>
+            <p style={styles.cardValue}>
+              {stats ? `${stats.dsa.seen} / ${stats.dsa.total}` : "—"}
+            </p>
           </div>
           <div style={styles.card}>
-            <h3 style={styles.cardTitle}>Streak</h3>
-            <p style={styles.cardValue}>10 Days</p>
+            <h3 style={styles.cardTitle}>DSA Solved</h3>
+            <p style={{ ...styles.cardValue, color: "#16a34a" }}>
+              {stats ? `${stats.dsa.solved} / ${stats.dsa.total}` : "—"}
+            </p>
           </div>
         </div>
 
-        {/* Interview Questions Link Card */}
+        {/* Interview Questions */}
         <div style={styles.section}>
-          <h3 style={{ margin: "0 0 12px" }}>📚 Interview Questions</h3>
+          <h3 style={{ margin: "0 0 8px" }}>📚 Interview Questions</h3>
           <p style={{ margin: "0 0 16px", color: "#555", fontSize: 14 }}>
-            Practice 50 curated interview questions across JavaScript, React, Data Structures, Algorithms, and more.
+            100 curated questions across JavaScript, React, Node.js, CSS, HTML, Data Structures, Algorithms, System Design, Behavioral, and Database.
           </p>
-          <Link to="/questions" style={styles.questionsBtn}>
+          <Link to="/questions" style={styles.linkBtn("#11998e", "#38ef7d")}>
             Open Interview Questions →
           </Link>
         </div>
 
-        {/* Recent Activity */}
+        {/* DSA Problems */}
         <div style={styles.section}>
-          <h3>Recent Activity</h3>
-          <ul>
-            <li>Solved Two Sum</li>
-            <li>Completed Mock Interview</li>
-            <li>Solved Binary Search</li>
-          </ul>
+          <h3 style={{ margin: "0 0 8px" }}>🧠 DSA Problems</h3>
+          <p style={{ margin: "0 0 16px", color: "#555", fontSize: 14 }}>
+            20 curated DSA problems covering Arrays, Strings, Linked Lists, Trees, Graphs, DP, and more — with full solutions and complexity analysis.
+          </p>
+          <Link to="/dsa" style={styles.linkBtn("#6366f1", "#8b5cf6")}>
+            Open DSA Problems →
+          </Link>
+        </div>
+
+        {/* Profile shortcut */}
+        <div style={styles.section}>
+          <h3 style={{ margin: "0 0 8px" }}>👤 Your Profile</h3>
+          <p style={{ margin: "0 0 16px", color: "#555", fontSize: 14 }}>
+            View your progress across all question types and track how many you've seen and solved.
+          </p>
+          <Link to="/profile" style={styles.linkBtn("#f97316", "#fb923c")}>
+            View Profile →
+          </Link>
         </div>
       </div>
     </div>
@@ -77,14 +119,22 @@ const styles = {
     justifyContent: "space-between",
     alignItems: "center",
   },
+  profileBtn: {
+    color: "white",
+    textDecoration: "none",
+    padding: "7px 14px",
+    border: "1px solid rgba(255,255,255,0.3)",
+    borderRadius: 5,
+    fontSize: 13,
+  },
   logoutBtn: {
     backgroundColor: "#ef4444",
     color: "white",
     border: "none",
     padding: "8px 15px",
     cursor: "pointer",
-    borderRadius: "5px",
-    fontSize: "14px",
+    borderRadius: 5,
+    fontSize: 14,
   },
   container: { padding: "20px" },
   cards: { display: "flex", gap: "20px", marginBottom: "20px", flexWrap: "wrap" },
@@ -105,15 +155,15 @@ const styles = {
     marginBottom: "20px",
     boxShadow: "0px 2px 5px rgba(0,0,0,0.1)",
   },
-  questionsBtn: {
+  linkBtn: (c1, c2) => ({
     display: "inline-block",
     padding: "10px 22px",
-    background: "linear-gradient(135deg, #11998e, #38ef7d)",
+    background: `linear-gradient(135deg, ${c1}, ${c2})`,
     color: "white",
     textDecoration: "none",
     borderRadius: "8px",
     fontWeight: "700",
     fontSize: "14px",
-    boxShadow: "0 2px 8px rgba(17,153,142,0.25)",
-  },
+    boxShadow: `0 2px 8px ${c1}44`,
+  }),
 };
