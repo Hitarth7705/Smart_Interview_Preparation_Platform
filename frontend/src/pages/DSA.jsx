@@ -19,6 +19,7 @@ const TOPICS = [
   "Sliding Window",
   "Backtracking",
   "Greedy",
+  "Bit Manipulation",
 ];
 
 const DIFFICULTY_COLORS = {

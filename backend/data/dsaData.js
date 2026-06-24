@@ -469,6 +469,747 @@ const dsaQuestions = [
     spaceComplexity: "O(1)",
     tags: ["greedy", "array", "jump"],
   },
+
+// ── Heaps ───────────────────────────────────────────────────
+// ── Arrays ────────────────────────────────────────────────
+{
+  dsaNumber: 21,
+  title: "Product of Array Except Self",
+  problem: "Given an integer array nums, return an array answer such that answer[i] is the product of all elements except nums[i].",
+  solution: `function productExceptSelf(nums) {
+    const n = nums.length;
+    const res = Array(n).fill(1);
+    let prefix = 1, suffix = 1;
+    for (let i = 0; i < n; i++) {
+      res[i] = prefix;
+      prefix *= nums[i];
+    }
+    for (let i = n - 1; i >= 0; i--) {
+      res[i] *= suffix;
+      suffix *= nums[i];
+    }
+    return res;
+  }`,
+  approach: "Use prefix and suffix products to avoid division. Two passes give O(n) time and O(1) extra space.",
+  topic: "Arrays",
+  difficulty: "Medium",
+  timeComplexity: "O(n)",
+  spaceComplexity: "O(1)",
+  tags: ["array", "prefix", "suffix"],
+},
+
+{
+  dsaNumber: 22,
+  title: "Merge Intervals",
+  problem: "Given an array of intervals, merge all overlapping intervals.",
+  solution: `function merge(intervals) {
+    intervals.sort((a,b)=>a[0]-b[0]);
+    const res=[intervals[0]];
+    for (let i=1;i<intervals.length;i++) {
+      const last=res[res.length-1];
+      if (intervals[i][0]<=last[1]) last[1]=Math.max(last[1],intervals[i][1]);
+      else res.push(intervals[i]);
+    }
+    return res;
+  }`,
+  approach: "Sort by start time, then merge overlapping intervals greedily.",
+  topic: "Arrays",
+  difficulty: "Medium",
+  timeComplexity: "O(n log n)",
+  spaceComplexity: "O(n)",
+  tags: ["array", "intervals", "sorting"],
+},
+
+// ── Strings ───────────────────────────────────────────────
+{
+  dsaNumber: 23,
+  title: "Palindrome Partitioning",
+  problem: "Partition a string into all possible palindrome substrings.",
+  solution: `function partition(s) {
+    const res=[], path=[];
+    const isPal=(str,l,r)=>{
+      while(l<r) if(str[l++]!==str[r--]) return false;
+      return true;
+    };
+    const backtrack=(start)=>{
+      if(start===s.length){res.push([...path]);return;}
+      for(let end=start;end<s.length;end++){
+        if(isPal(s,start,end)){
+          path.push(s.slice(start,end+1));
+          backtrack(end+1);
+          path.pop();
+        }
+      }
+    };
+    backtrack(0);
+    return res;
+  }`,
+  approach: "Backtracking with palindrome check at each step.",
+  topic: "Strings",
+  difficulty: "Medium",
+  timeComplexity: "O(n·2^n)",
+  spaceComplexity: "O(n)",
+  tags: ["string", "backtracking", "palindrome"],
+},
+
+{
+  dsaNumber: 24,
+  title: "Longest Palindromic Substring",
+  problem: "Given a string s, return the longest palindromic substring.",
+  solution: `function longestPalindrome(s) {
+    let res="";
+    const expand=(l,r)=>{
+      while(l>=0 && r<s.length && s[l]===s[r]){
+        if(r-l+1>res.length) res=s.slice(l,r+1);
+        l--;r++;
+      }
+    };
+    for(let i=0;i<s.length;i++){
+      expand(i,i);
+      expand(i,i+1);
+    }
+    return res;
+  }`,
+  approach: "Expand around center for each index.",
+  topic: "Strings",
+  difficulty: "Medium",
+  timeComplexity: "O(n²)",
+  spaceComplexity: "O(1)",
+  tags: ["string", "palindrome", "two pointers"],
+},
+
+// ── Linked Lists ──────────────────────────────────────────
+{
+  dsaNumber: 25,
+  title: "Merge Two Sorted Lists",
+  problem: "Merge two sorted linked lists and return as a new sorted list.",
+  solution: `function mergeTwoLists(l1,l2){
+    const dummy={next:null}; let curr=dummy;
+    while(l1 && l2){
+      if(l1.val<l2.val){curr.next=l1;l1=l1.next;}
+      else{curr.next=l2;l2=l2.next;}
+      curr=curr.next;
+    }
+    curr.next=l1||l2;
+    return dummy.next;
+  }`,
+  approach: "Iteratively merge nodes by comparing heads.",
+  topic: "Linked Lists",
+  difficulty: "Easy",
+  timeComplexity: "O(n+m)",
+  spaceComplexity: "O(1)",
+  tags: ["linked list", "merge"],
+},
+
+{
+  dsaNumber: 26,
+  title: "Remove Nth Node From End",
+  problem: "Remove the nth node from the end of a linked list.",
+  solution: `function removeNthFromEnd(head,n){
+    const dummy={next:head}; let slow=dummy,fast=dummy;
+    for(let i=0;i<=n;i++) fast=fast.next;
+    while(fast){slow=slow.next;fast=fast.next;}
+    slow.next=slow.next.next;
+    return dummy.next;
+  }`,
+  approach: "Two-pointer technique with dummy node.",
+  topic: "Linked Lists",
+  difficulty: "Medium",
+  timeComplexity: "O(n)",
+  spaceComplexity: "O(1)",
+  tags: ["linked list", "two pointers"],
+},
+
+// ── Stacks & Queues ───────────────────────────────────────
+{
+  dsaNumber: 27,
+  title: "Min Stack",
+  problem: "Design a stack that supports push, pop, top, and retrieving minimum in O(1).",
+  solution: `class MinStack{
+    constructor(){this.stack=[];this.min=[];}
+    push(x){this.stack.push(x);this.min.push(this.min.length?Math.min(x,this.min[this.min.length-1]):x);}
+    pop(){this.stack.pop();this.min.pop();}
+    top(){return this.stack[this.stack.length-1];}
+    getMin(){return this.min[this.min.length-1];}
+  }`,
+  approach: "Maintain auxiliary stack for minimums.",
+  topic: "Stacks & Queues",
+  difficulty: "Medium",
+  timeComplexity: "O(1)",
+  spaceComplexity: "O(n)",
+  tags: ["stack", "design"],
+},
+
+{
+  dsaNumber: 28,
+  title: "Implement Queue using Stacks",
+  problem: "Implement a queue using two stacks.",
+  solution: `class MyQueue{
+    constructor(){this.in=[];this.out=[];}
+    push(x){this.in.push(x);}
+    pop(){if(!this.out.length) while(this.in.length) this.out.push(this.in.pop()); return this.out.pop();}
+    peek(){if(!this.out.length) while(this.in.length) this.out.push(this.in.pop()); return this.out[this.out.length-1];}
+    empty(){return !this.in.length && !this.out.length;}
+  }`,
+  approach: "Use two stacks: in-stack for push, out-stack for pop/peek.",
+  topic: "Stacks & Queues",
+  difficulty: "Easy",
+  timeComplexity: "Amortized O(1)",
+  spaceComplexity: "O(n)",
+  tags: ["stack", "queue"],
+},
+
+// ── Trees ─────────────────────────────────────────────────
+{
+  dsaNumber: 29,
+  title: "Binary Tree Level Order Traversal",
+  problem: "Return level order traversal of a binary tree.",
+  solution: `function levelOrder(root){
+    if(!root) return [];
+    const res=[],q=[root];
+    while(q.length){
+      const size=q.length,level=[];
+      for(let i=0;i<size;i++){
+        const node=q.shift();
+        level.push(node.val);
+        if(node.left) q.push(node.left);
+        if(node.right) q.push(node.right);
+      }
+      res.push(level);
+    }
+    return res;
+  }`,
+  approach: "BFS using queue.",
+  topic: "Trees",
+  difficulty: "Medium",
+  timeComplexity: "O(n)",
+  spaceComplexity: "O(n)",
+  tags: ["tree", "BFS"],
+},
+
+// ── Trees ────────────────────────────────────────────────
+{
+  dsaNumber: 30,
+  title: "Lowest Common Ancestor of BST",
+  problem: "Find the lowest common ancestor of two nodes in a BST.",
+  solution: `function lowestCommonAncestor(root,p,q){
+    while(root){
+      if(p.val<root.val && q.val<root.val) root=root.left;
+      else if(p.val>root.val && q.val>root.val) root=root.right;
+      else return root;
+    }
+  }`,
+  approach: "Traverse down BST; split point is the LCA.",
+  topic: "Trees",
+  difficulty: "Easy",
+  timeComplexity: "O(h)",
+  spaceComplexity: "O(1)",
+  tags: ["BST","tree","ancestor"],
+},
+
+{
+  dsaNumber: 31,
+  title: "Serialize and Deserialize Binary Tree",
+  problem: "Design an algorithm to serialize and deserialize a binary tree.",
+  solution: `function serialize(root){
+    if(!root) return "null,";
+    return root.val+","+
+      serialize(root.left)+
+      serialize(root.right);
+  }
+  function deserialize(data){
+    const vals=data.split(",");
+    let i=0;
+    function build(){
+      if(vals[i]==="null"){i++;return null;}
+      const node={val:parseInt(vals[i++])};
+      node.left=build();
+      node.right=build();
+      return node;
+    }
+    return build();
+  }`,
+  approach: "Preorder traversal with null markers.",
+  topic: "Trees",
+  difficulty: "Hard",
+  timeComplexity: "O(n)",
+  spaceComplexity: "O(n)",
+  tags: ["tree","serialization","DFS"],
+},
+
+// ── Graphs ───────────────────────────────────────────────
+{
+  dsaNumber: 32,
+  title: "Clone Graph",
+  problem: "Clone an undirected graph given a node reference.",
+  solution: `function cloneGraph(node){
+    if(!node) return null;
+    const map=new Map();
+    const dfs=(n)=>{
+      if(map.has(n)) return map.get(n);
+      const copy={val:n.val,neighbors:[]};
+      map.set(n,copy);
+      for(const nei of n.neighbors)
+        copy.neighbors.push(dfs(nei));
+      return copy;
+    };
+    return dfs(node);
+  }`,
+  approach: "DFS with hash map to avoid cycles.",
+  topic: "Graphs",
+  difficulty: "Medium",
+  timeComplexity: "O(V+E)",
+  spaceComplexity: "O(V)",
+  tags: ["graph","DFS","clone"],
+},
+
+{
+  dsaNumber: 33,
+  title: "Pacific Atlantic Water Flow",
+  problem: "Find cells where water can flow to both Pacific and Atlantic oceans.",
+  solution: `function pacificAtlantic(heights){
+    const m=heights.length,n=heights[0].length;
+    const pac=new Set(),atl=new Set();
+    const dfs=(r,c,vis,prev)=>{
+      if(r<0||c<0||r>=m||c>=n||vis.has(r+","+c)||heights[r][c]<prev) return;
+      vis.add(r+","+c);
+      dfs(r+1,c,vis,heights[r][c]);
+      dfs(r-1,c,vis,heights[r][c]);
+      dfs(r,c+1,vis,heights[r][c]);
+      dfs(r,c-1,vis,heights[r][c]);
+    };
+    for(let i=0;i<m;i++){dfs(i,0,pac,-Infinity);dfs(i,n-1,atl,-Infinity);}
+    for(let j=0;j<n;j++){dfs(0,j,pac,-Infinity);dfs(m-1,j,atl,-Infinity);}
+    const res=[];
+    for(let i=0;i<m;i++)for(let j=0;j<n;j++)
+      if(pac.has(i+","+j)&&atl.has(i+","+j)) res.push([i,j]);
+    return res;
+  }`,
+  approach: "DFS from ocean borders; intersection gives result.",
+  topic: "Graphs",
+  difficulty: "Medium",
+  timeComplexity: "O(m·n)",
+  spaceComplexity: "O(m·n)",
+  tags: ["graph","DFS","matrix"],
+},
+
+// ── Dynamic Programming ──────────────────────────────────
+{
+  dsaNumber: 34,
+  title: "Longest Increasing Subsequence",
+  problem: "Find length of longest increasing subsequence in array.",
+  solution: `function lengthOfLIS(nums){
+    const dp=[];
+    for(const n of nums){
+      let l=0,r=dp.length;
+      while(l<r){
+        const mid=Math.floor((l+r)/2);
+        if(dp[mid]<n) l=mid+1; else r=mid;
+      }
+      dp[l]=n;
+    }
+    return dp.length;
+  }`,
+  approach: "Patience sorting with binary search.",
+  topic: "Dynamic Programming",
+  difficulty: "Medium",
+  timeComplexity: "O(n log n)",
+  spaceComplexity: "O(n)",
+  tags: ["DP","binary search","LIS"],
+},
+
+{
+  dsaNumber: 35,
+  title: "Edit Distance",
+  problem: "Compute minimum operations to convert word1 to word2.",
+  solution: `function minDistance(a,b){
+    const m=a.length,n=b.length;
+    const dp=Array.from({length:m+1},()=>Array(n+1).fill(0));
+    for(let i=0;i<=m;i++) dp[i][0]=i;
+    for(let j=0;j<=n;j++) dp[0][j]=j;
+    for(let i=1;i<=m;i++)
+      for(let j=1;j<=n;j++)
+        dp[i][j]=a[i-1]===b[j-1]?dp[i-1][j-1]:
+          1+Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]);
+    return dp[m][n];
+  }`,
+  approach: "Classic DP with 2D table.",
+  topic: "Dynamic Programming",
+  difficulty: "Hard",
+  timeComplexity: "O(m·n)",
+  spaceComplexity: "O(m·n)",
+  tags: ["DP","string","edit distance"],
+},
+
+// ── Sorting & Searching ──────────────────────────────────
+{
+  dsaNumber: 36,
+  title: "Search in Rotated Sorted Array",
+  problem: "Search target in rotated sorted array.",
+  solution: `function search(nums,target){
+    let l=0,r=nums.length-1;
+    while(l<=r){
+      const mid=Math.floor((l+r)/2);
+      if(nums[mid]===target) return mid;
+      if(nums[l]<=nums[mid]){
+        if(nums[l]<=target&&target<nums[mid]) r=mid-1;
+        else l=mid+1;
+      }else{
+        if(nums[mid]<target&&target<=nums[r]) l=mid+1;
+        else r=mid-1;
+      }
+    }
+    return -1;
+  }`,
+  approach: "Modified binary search.",
+  topic: "Sorting & Searching",
+  difficulty: "Medium",
+  timeComplexity: "O(log n)",
+  spaceComplexity: "O(1)",
+  tags: ["binary search","array"],
+},
+
+{
+  dsaNumber: 37,
+  title: "Median of Two Sorted Arrays",
+  problem: "Find median of two sorted arrays.",
+  solution: `function findMedianSortedArrays(a,b){
+    const nums=[...a,...b].sort((x,y)=>x-y);
+    const n=nums.length;
+    return n%2?nums[Math.floor(n/2)]:(nums[n/2-1]+nums[n/2])/2;
+  }`,
+  approach: "Merge and sort; optimal uses binary search partition.",
+  topic: "Sorting & Searching",
+  difficulty: "Hard",
+  timeComplexity: "O((m+n) log(m+n))",
+  spaceComplexity: "O(m+n)",
+  tags: ["array","median","binary search"],
+},
+
+// ── Recursion ────────────────────────────────────────────
+{
+  dsaNumber: 38,
+  title: "Generate Parentheses",
+  problem: "Generate all combinations of n pairs of parentheses.",
+  solution: `function generateParenthesis(n){
+    const res=[];
+    const backtrack=(s,l,r)=>{
+      if(s.length===2*n){res.push(s);return;}
+      if(l<n) backtrack(s+"(",l+1,r);
+      if(r<l) backtrack(s+")",l,r+1);
+    };
+    backtrack("",0,0);
+    return res;
+  }`,
+  approach: "Backtracking with constraints on left/right counts.",
+  topic: "Recursion",
+  difficulty: "Medium",
+  timeComplexity: "O(2^n)",
+  spaceComplexity: "O(n)",
+  tags: ["recursion","backtracking","string"],
+},
+
+// ── Recursion ────────────────────────────────────────────
+{
+  dsaNumber: 39,
+  title: "Combination Sum",
+  problem: "Given an array of distinct integers and a target, return all unique combinations where the chosen numbers sum to target.",
+  solution: `function combinationSum(candidates, target) {
+    const res = [];
+    const dfs = (start, path, sum) => {
+      if (sum === target) { res.push([...path]); return; }
+      if (sum > target) return;
+      for (let i = start; i < candidates.length; i++) {
+        path.push(candidates[i]);
+        dfs(i, path, sum + candidates[i]);
+        path.pop();
+      }
+    };
+    dfs(0, [], 0);
+    return res;
+  }`,
+  approach: "Backtracking with recursion; allow reuse of same element by not incrementing index.",
+  topic: "Recursion",
+  difficulty: "Medium",
+  timeComplexity: "O(2^n)",
+  spaceComplexity: "O(n)",
+  tags: ["recursion","backtracking","array"],
+},
+
+{
+  dsaNumber: 40,
+  title: "Letter Combinations of Phone Number",
+  problem: "Given a digit string, return all possible letter combinations based on phone keypad mapping.",
+  solution: `function letterCombinations(digits) {
+    if (!digits.length) return [];
+    const map = {2:"abc",3:"def",4:"ghi",5:"jkl",6:"mno",7:"pqrs",8:"tuv",9:"wxyz"};
+    const res = [];
+    const dfs = (i, path) => {
+      if (i === digits.length) { res.push(path); return; }
+      for (const c of map[digits[i]]) dfs(i+1, path+c);
+    };
+    dfs(0,"");
+    return res;
+  }`,
+  approach: "Recursive DFS building strings digit by digit.",
+  topic: "Recursion",
+  difficulty: "Medium",
+  timeComplexity: "O(4^n)",
+  spaceComplexity: "O(n)",
+  tags: ["recursion","DFS","string"],
+},
+
+// ── Hashing ──────────────────────────────────────────────
+{
+  dsaNumber: 41,
+  title: "Longest Consecutive Sequence",
+  problem: "Find length of longest consecutive elements sequence in array.",
+  solution: `function longestConsecutive(nums) {
+    const set = new Set(nums);
+    let longest = 0;
+    for (const n of set) {
+      if (!set.has(n-1)) {
+        let length = 1;
+        while (set.has(n+length)) length++;
+        longest = Math.max(longest,length);
+      }
+    }
+    return longest;
+  }`,
+  approach: "Use hash set to check consecutive runs starting from sequence heads.",
+  topic: "Hashing",
+  difficulty: "Medium",
+  timeComplexity: "O(n)",
+  spaceComplexity: "O(n)",
+  tags: ["hash set","array","sequence"],
+},
+
+{
+  dsaNumber: 42,
+  title: "Two Sum II - Input Array Sorted",
+  problem: "Given sorted array, find two numbers that sum to target.",
+  solution: `function twoSumSorted(nums,target){
+    let l=0,r=nums.length-1;
+    while(l<r){
+      const sum=nums[l]+nums[r];
+      if(sum===target) return [l+1,r+1];
+      if(sum<target) l++; else r--;
+    }
+  }`,
+  approach: "Two-pointer technique on sorted array.",
+  topic: "Hashing",
+  difficulty: "Easy",
+  timeComplexity: "O(n)",
+  spaceComplexity: "O(1)",
+  tags: ["two pointers","array"],
+},
+
+// ── Heaps ────────────────────────────────────────────────
+{
+  dsaNumber: 43,
+  title: "Merge K Sorted Lists",
+  problem: "Merge k sorted linked lists into one sorted list.",
+  solution: `function mergeKLists(lists){
+    const arr=[];
+    for(const l of lists){
+      let node=l;
+      while(node){arr.push(node.val);node=node.next;}
+    }
+    arr.sort((a,b)=>a-b);
+    const dummy={next:null}; let curr=dummy;
+    for(const v of arr){curr.next={val:v};curr=curr.next;}
+    return dummy.next;
+  }`,
+  approach: "Collect all values, sort, rebuild list. Optimal uses min-heap.",
+  topic: "Heaps",
+  difficulty: "Hard",
+  timeComplexity: "O(N log N)",
+  spaceComplexity: "O(N)",
+  tags: ["heap","linked list","merge"],
+},
+
+{
+  dsaNumber: 44,
+  title: "Find Median from Data Stream",
+  problem: "Design structure to add numbers and find median.",
+  solution: `class MedianFinder{
+    constructor(){this.arr=[];}
+    addNum(num){this.arr.push(num);this.arr.sort((a,b)=>a-b);}
+    findMedian(){
+      const n=this.arr.length;
+      return n%2?this.arr[Math.floor(n/2)]:(this.arr[n/2-1]+this.arr[n/2])/2;
+    }
+  }`,
+  approach: "Maintain sorted array; optimal uses two heaps.",
+  topic: "Heaps",
+  difficulty: "Hard",
+  timeComplexity: "O(n log n)",
+  spaceComplexity: "O(n)",
+  tags: ["heap","design","median"],
+},
+
+// ── Two Pointers ─────────────────────────────────────────
+{
+  dsaNumber: 45,
+  title: "Container With Most Water",
+  problem: "Find max area formed by lines in array.",
+  solution: `function maxArea(height){
+    let l=0,r=height.length-1,max=0;
+    while(l<r){
+      max=Math.max(max,(r-l)*Math.min(height[l],height[r]));
+      if(height[l]<height[r]) l++; else r--;
+    }
+    return max;
+  }`,
+  approach: "Two-pointer shrinking window to maximize area.",
+  topic: "Two Pointers",
+  difficulty: "Medium",
+  timeComplexity: "O(n)",
+  spaceComplexity: "O(1)",
+  tags: ["two pointers","array"],
+},
+
+{
+  dsaNumber: 46,
+  title: "Remove Duplicates from Sorted Array",
+  problem: "Remove duplicates in-place from sorted array.",
+  solution: `function removeDuplicates(nums){
+    let i=0;
+    for(const n of nums) if(i<1||n!==nums[i-1]) nums[i++]=n;
+    return i;
+  }`,
+  approach: "Two-pointer overwrite technique.",
+  topic: "Two Pointers",
+  difficulty: "Easy",
+  timeComplexity: "O(n)",
+  spaceComplexity: "O(1)",
+  tags: ["two pointers","array"],
+},
+
+// ── Sliding Window ───────────────────────────────────────
+{
+  dsaNumber: 47,
+  title: "Minimum Window Substring",
+  problem: "Find smallest substring of s containing all chars of t.",
+  solution: `function minWindow(s,t){
+    const need={},have={};
+    for(const c of t) need[c]=(need[c]||0)+1;
+    let l=0,count=0,res="";
+    for(let r=0;r<s.length;r++){
+      const c=s[r]; have[c]=(have[c]||0)+1;
+      if(have[c]===need[c]) count++;
+      while(count===Object.keys(need).length){
+        if(!res||r-l+1<res.length) res=s.slice(l,r+1);
+        have[s[l]]--; if(have[s[l]]<need[s[l]]) count--;
+        l++;
+      }
+    }
+    return res;
+  }`,
+  approach: "Sliding window with hash maps.",
+  topic: "Sliding Window",
+  difficulty: "Hard",
+  timeComplexity: "O(n)",
+  spaceComplexity: "O(n)",
+  tags: ["sliding window","string"],
+},
+
+{
+  dsaNumber: 48,
+  title: "Permutation in String",
+  problem: "Check if s2 contains a permutation of s1.",
+  solution: `function checkInclusion(s1,s2){
+    const need={},have={};
+    for(const c of s1) need[c]=(need[c]||0)+1;
+    let l=0,count=0;
+    for(let r=0;r<s2.length;r++){
+      const c=s2[r]; have[c]=(have[c]||0)+1;
+      if(have[c]===need[c]) count++;
+      if(r-l+1>s1.length){
+        if(have[s2[l]]===need[s2[l]]) count--;
+        have[s2[l]]--; l++;
+      }
+      if(count===Object.keys(need).length) return true;
+    }
+    return false;
+  }`,
+  approach: "Sliding window of length s1 with frequency maps.",
+  topic: "Sliding Window",
+  difficulty: "Medium",
+  timeComplexity: "O(n)",
+  spaceComplexity: "O(1)",
+  tags: ["sliding window","string"],
+},
+
+// ── Backtracking ─────────────────────────────────────────
+{
+  dsaNumber: 49,
+  title: "Sudoku Solver",
+  problem: "Write a program to solve a Sudoku puzzle by filling empty cells. The solution must satisfy Sudoku rules.",
+  solution: `function solveSudoku(board) {
+    const isValid = (r,c,n) => {
+      for (let i=0;i<9;i++) {
+        if (board[r][i]==n || board[i][c]==n) return false;
+        const row=3*Math.floor(r/3)+Math.floor(i/3);
+        const col=3*Math.floor(c/3)+i%3;
+        if (board[row][col]==n) return false;
+      }
+      return true;
+    };
+    const dfs = () => {
+      for (let r=0;r<9;r++) {
+        for (let c=0;c<9;c++) {
+          if (board[r][c]===".") {
+            for (let n=1;n<=9;n++) {
+              const ch=String(n);
+              if (isValid(r,c,ch)) {
+                board[r][c]=ch;
+                if (dfs()) return true;
+                board[r][c]=".";
+              }
+            }
+            return false;
+          }
+        }
+      }
+      return true;
+    };
+    dfs();
+  }`,
+  approach: "Backtracking with constraint checking for rows, columns, and subgrids.",
+  topic: "Backtracking",
+  difficulty: "Hard",
+  timeComplexity: "O(9^(n))",
+  spaceComplexity: "O(1)",
+  tags: ["backtracking","recursion","sudoku"],
+},
+
+// ── Greedy ───────────────────────────────────────────────
+{
+  dsaNumber: 50,
+  title: "Gas Station",
+  problem: "There are n gas stations arranged in a circle. Given gas[i] and cost[i], return the starting station index if you can travel around once, otherwise -1.",
+  solution: `function canCompleteCircuit(gas,cost){
+    let total=0,tank=0,start=0;
+    for(let i=0;i<gas.length;i++){
+      total+=gas[i]-cost[i];
+      tank+=gas[i]-cost[i];
+      if(tank<0){start=i+1;tank=0;}
+    }
+    return total>=0?start:-1;
+  }`,
+  approach: "Greedy: if tank drops below 0, reset start to next station. If total gas >= total cost, solution exists.",
+  topic: "Greedy",
+  difficulty: "Medium",
+  timeComplexity: "O(n)",
+  spaceComplexity: "O(1)",
+  tags: ["greedy","array","gas station"],
+},
+
+
 ];
+
+// ── More DP, Greedy, Backtracking, etc. ─────────────────────
+// (31–50 continue in same style: e.g., Edit Distance, Longest Pal
 
 module.exports = dsaQuestions;
