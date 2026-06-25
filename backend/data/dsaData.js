@@ -1205,11 +1205,1106 @@ const dsaQuestions = [
   spaceComplexity: "O(1)",
   tags: ["greedy","array","gas station"],
 },
+// ── Bit Manipulation ─────────────────────────────────────
+{
+  dsaNumber: 51,
+  title: "Single Number",
+  problem: "Given a non-empty array of integers, every element appears twice except one. Find that single one.",
+  solution: `function singleNumber(nums) {
+    return nums.reduce((a,b)=>a^b);
+  }`,
+  approach: "Use XOR property: duplicates cancel out, leaving the unique element.",
+  topic: "Bit Manipulation",
+  difficulty: "Easy",
+  timeComplexity: "O(n)",
+  spaceComplexity: "O(1)",
+  tags: ["XOR","array","bit manipulation"],
+},
 
+{
+  dsaNumber: 52,
+  title: "Number of 1 Bits",
+  problem: "Write a function that takes an integer and returns the number of '1' bits in its binary representation.",
+  solution: `function hammingWeight(n) {
+    let count=0;
+    while(n!==0){count+=n&1;n>>>=1;}
+    return count;
+  }`,
+  approach: "Iteratively check each bit using bitwise AND.",
+  topic: "Bit Manipulation",
+  difficulty: "Easy",
+  timeComplexity: "O(32)",
+  spaceComplexity: "O(1)",
+  tags: ["bit manipulation","count bits"],
+},
+
+{
+  dsaNumber: 53,
+  title: "Reverse Bits",
+  problem: "Reverse bits of a given 32-bit unsigned integer.",
+  solution: `function reverseBits(n) {
+    let res=0;
+    for(let i=0;i<32;i++){
+      res=(res<<1)|(n&1);
+      n>>>=1;
+    }
+    return res>>>0;
+  }`,
+  approach: "Shift result left and append last bit of n until all 32 bits processed.",
+  topic: "Bit Manipulation",
+  difficulty: "Easy",
+  timeComplexity: "O(32)",
+  spaceComplexity: "O(1)",
+  tags: ["bit manipulation","reverse bits"],
+},
+
+{
+  dsaNumber: 54,
+  title: "Missing Number",
+  problem: "Given array containing n distinct numbers from 0..n, find the missing number.",
+  solution: `function missingNumber(nums){
+    let res=0;
+    for(let i=0;i<nums.length;i++) res^=i^nums[i];
+    return res^nums.length;
+  }`,
+  approach: "XOR all indices and values; duplicates cancel leaving missing number.",
+  topic: "Bit Manipulation",
+  difficulty: "Easy",
+  timeComplexity: "O(n)",
+  spaceComplexity: "O(1)",
+  tags: ["XOR","array","bit manipulation"],
+},
+
+{
+  dsaNumber: 55,
+  title: "Power of Two",
+  problem: "Given an integer n, return true if it is a power of two.",
+  solution: `function isPowerOfTwo(n){
+    return n>0 && (n&(n-1))===0;
+  }`,
+  approach: "A power of two has only one bit set; check with n&(n-1).",
+  topic: "Bit Manipulation",
+  difficulty: "Easy",
+  timeComplexity: "O(1)",
+  spaceComplexity: "O(1)",
+  tags: ["bit manipulation","math"],
+},
+// ── Arrays ────────────────────────────────────────────────
+{
+  dsaNumber: 56,
+  title: "Rotate Array",
+  problem: "Rotate array to the right by k steps.",
+  solution: `function rotate(nums,k){
+    k%=nums.length;
+    nums.reverse();
+    reverse(nums,0,k-1);
+    reverse(nums,k,nums.length-1);
+    function reverse(arr,l,r){
+      while(l<r)[arr[l++],arr[r--]]=[arr[r],arr[l]];
+    }
+  }`,
+  approach: "Reverse entire array, then reverse parts.",
+  topic: "Arrays",
+  difficulty: "Medium",
+  timeComplexity: "O(n)",
+  spaceComplexity: "O(1)",
+  tags: ["array","rotation"],
+},
+
+{
+  dsaNumber: 57,
+  title: "Find Duplicate Number",
+  problem: "Find the duplicate number in array of n+1 integers.",
+  solution: `function findDuplicate(nums){
+    let slow=nums[0],fast=nums[nums[0]];
+    while(slow!==fast){slow=nums[slow];fast=nums[nums[fast]];}
+    fast=0;
+    while(slow!==fast){slow=nums[slow];fast=nums[fast];}
+    return slow;
+  }`,
+  approach: "Floyd’s cycle detection.",
+  topic: "Arrays",
+  difficulty: "Medium",
+  timeComplexity: "O(n)",
+  spaceComplexity: "O(1)",
+  tags: ["array","cycle detection"],
+},
+
+// ── Strings ───────────────────────────────────────────────
+{
+  dsaNumber: 58,
+  title: "Valid Palindrome",
+  problem: "Check if string is palindrome ignoring non-alphanumeric.",
+  solution: `function isPalindrome(s){
+    s=s.replace(/[^a-z0-9]/gi,"").toLowerCase();
+    let l=0,r=s.length-1;
+    while(l<r) if(s[l++]!==s[r--]) return false;
+    return true;
+  }`,
+  approach: "Two-pointer check after cleaning string.",
+  topic: "Strings",
+  difficulty: "Easy",
+  timeComplexity: "O(n)",
+  spaceComplexity: "O(1)",
+  tags: ["string","palindrome"],
+},
+
+{
+  dsaNumber: 59,
+  title: "Implement strStr()",
+  problem: "Return index of first occurrence of needle in haystack.",
+  solution: `function strStr(haystack,needle){
+    return haystack.indexOf(needle);
+  }`,
+  approach: "Use built-in or implement substring search.",
+  topic: "Strings",
+  difficulty: "Easy",
+  timeComplexity: "O(n·m)",
+  spaceComplexity: "O(1)",
+  tags: ["string","search"],
+},
+
+// ── Linked Lists ──────────────────────────────────────────
+{
+  dsaNumber: 60,
+  title: "Palindrome Linked List",
+  problem: "Check if linked list is palindrome.",
+  solution: `function isPalindrome(head){
+    let slow=head,fast=head;
+    while(fast&&fast.next){slow=slow.next;fast=fast.next.next;}
+    let prev=null;
+    while(slow){const next=slow.next;slow.next=prev;prev=slow;slow=next;}
+    while(prev){if(prev.val!==head.val)return false;prev=prev.next;head=head.next;}
+    return true;
+  }`,
+  approach: "Find middle, reverse second half, compare.",
+  topic: "Linked Lists",
+  difficulty: "Medium",
+  timeComplexity: "O(n)",
+  spaceComplexity: "O(1)",
+  tags: ["linked list","palindrome"],
+},
+
+{
+  dsaNumber: 61,
+  title: "Add Two Numbers",
+  problem: "Add two numbers represented by linked lists.",
+  solution: `function addTwoNumbers(l1,l2){
+    const dummy={next:null};let curr=dummy,carry=0;
+    while(l1||l2||carry){
+      const sum=(l1?l1.val:0)+(l2?l2.val:0)+carry;
+      carry=Math.floor(sum/10);
+      curr.next={val:sum%10};curr=curr.next;
+      l1=l1?l1.next:null;l2=l2?l2.next:null;
+    }
+    return dummy.next;
+  }`,
+  approach: "Simulate addition digit by digit.",
+  topic: "Linked Lists",
+  difficulty: "Medium",
+  timeComplexity: "O(n)",
+  spaceComplexity: "O(1)",
+  tags: ["linked list","addition"],
+},
+
+// ── Stacks & Queues ───────────────────────────────────────
+{
+  dsaNumber: 62,
+  title: "Daily Temperatures",
+  problem: "Return days until warmer temperature.",
+  solution: `function dailyTemperatures(T){
+    const res=Array(T.length).fill(0),stack=[];
+    for(let i=0;i<T.length;i++){
+      while(stack.length&&T[i]>T[stack[stack.length-1]]){
+        const idx=stack.pop();
+        res[idx]=i-idx;
+      }
+      stack.push(i);
+    }
+    return res;
+  }`,
+  approach: "Monotonic stack.",
+  topic: "Stacks & Queues",
+  difficulty: "Medium",
+  timeComplexity: "O(n)",
+  spaceComplexity: "O(n)",
+  tags: ["stack","monotonic"],
+},
+
+{
+  dsaNumber: 63,
+  title: "Sliding Window Maximum",
+  problem: "Find max in each sliding window of size k.",
+  solution: `function maxSlidingWindow(nums,k){
+    const res=[],dq=[];
+    for(let i=0;i<nums.length;i++){
+      while(dq.length&&dq[0]<=i-k) dq.shift();
+      while(dq.length&&nums[dq[dq.length-1]]<nums[i]) dq.pop();
+      dq.push(i);
+      if(i>=k-1) res.push(nums[dq[0]]);
+    }
+    return res;
+  }`,
+  approach: "Deque to maintain max.",
+  topic: "Stacks & Queues",
+  difficulty: "Hard",
+  timeComplexity: "O(n)",
+  spaceComplexity: "O(n)",
+  tags: ["deque","sliding window"],
+},
+
+// ── Trees ─────────────────────────────────────────────────
+{
+  dsaNumber: 64,
+  title: "Path Sum",
+  problem: "Check if tree has root-to-leaf path sum equal to target.",
+  solution: `function hasPathSum(root,sum){
+    if(!root) return false;
+    if(!root.left&&!root.right) return sum===root.val;
+    return hasPathSum(root.left,sum-root.val)||hasPathSum(root.right,sum-root.val);
+  }`,
+  approach: "DFS subtracting node values.",
+  topic: "Trees",
+  difficulty: "Easy",
+  timeComplexity: "O(n)",
+  spaceComplexity: "O(h)",
+  tags: ["tree","DFS"],
+},
+
+{
+  dsaNumber: 65,
+  title: "Construct Binary Tree from Preorder and Inorder",
+  problem: "Build tree from preorder and inorder traversal arrays.",
+  solution: `function buildTree(pre,inorder){
+    if(!pre.length) return null;
+    const root={val:pre[0]};
+    const idx=inorder.indexOf(pre[0]);
+    root.left=buildTree(pre.slice(1,idx+1),inorder.slice(0,idx));
+    root.right=buildTree(pre.slice(idx+1),inorder.slice(idx+1));
+    return root;
+  }`,
+  approach: "Recursively split arrays by root index.",
+  topic: "Trees",
+  difficulty: "Medium",
+  timeComplexity: "O(n²)",
+  spaceComplexity: "O(n)",
+  tags: ["tree","construction"],
+},
+
+// ── Graphs ───────────────────────────────────────────────
+{
+  dsaNumber: 66,
+  title: "Graph Valid Tree",
+  problem: "Check if edges form a valid tree.",
+  solution: `function validTree(n,edges){
+    if(edges.length!==n-1) return false;
+    const parent=Array(n).fill(0).map((_,i)=>i);
+    const find=x=>parent[x]===x?x:find(parent[x]);
+    for(const [u,v] of edges){
+      const pu=find(u),pv=find(v);
+      if(pu===pv) return false;
+      parent[pu]=pv;
+    }
+    return true;
+  }`,
+  approach: "Union-Find to detect cycles.",
+  topic: "Graphs",
+  difficulty: "Medium",
+  timeComplexity: "O(n)",
+  spaceComplexity: "O(n)",
+  tags: ["graph","union-find"],
+},
+// ── Graphs ───────────────────────────────────────────────
+{
+  dsaNumber: 67,
+  title: "Minimum Spanning Tree (Prim’s)",
+  problem: "Find MST of weighted graph using Prim’s algorithm.",
+  solution: `function primMST(graph){
+    const n=graph.length;
+    const visited=Array(n).fill(false);
+    const dist=Array(n).fill(Infinity);
+    dist[0]=0;
+    let cost=0;
+    for(let i=0;i<n;i++){
+      let u=-1;
+      for(let v=0;v<n;v++)
+        if(!visited[v]&&(u===-1||dist[v]<dist[u])) u=v;
+      visited[u]=true;
+      cost+=dist[u];
+      for(const [v,w] of graph[u])
+        if(!visited[v]&&w<dist[v]) dist[v]=w;
+    }
+    return cost;
+  }`,
+  approach: "Greedy selection of minimum edge using Prim’s algorithm.",
+  topic: "Graphs",
+  difficulty: "Hard",
+  timeComplexity: "O(V²)",
+  spaceComplexity: "O(V)",
+  tags: ["graph","MST","Prim"],
+},
+
+// ── Bit Manipulation ─────────────────────────────────────
+{
+  dsaNumber: 68,
+  title: "Subset XOR Sum",
+  problem: "Return sum of XOR of all subsets of array.",
+  solution: `function subsetXORSum(nums){
+    let res=0;
+    const dfs=(i,xor)=>{
+      if(i===nums.length){res+=xor;return;}
+      dfs(i+1,xor^nums[i]);
+      dfs(i+1,xor);
+    };
+    dfs(0,0);
+    return res;
+  }`,
+  approach: "DFS to generate subsets and compute XOR.",
+  topic: "Bit Manipulation",
+  difficulty: "Medium",
+  timeComplexity: "O(2^n)",
+  spaceComplexity: "O(n)",
+  tags: ["bit manipulation","subset","XOR"],
+},
+
+{
+  dsaNumber: 69,
+  title: "Maximum XOR of Two Numbers",
+  problem: "Find maximum XOR of any two numbers in array.",
+  solution: `function findMaximumXOR(nums){
+    let max=0,mask=0;
+    for(let i=31;i>=0;i--){
+      mask|=(1<<i);
+      const set=new Set(nums.map(n=>n&mask));
+      let candidate=max|(1<<i);
+      for(const prefix of set)
+        if(set.has(prefix^candidate)){max=candidate;break;}
+    }
+    return max;
+  }`,
+  approach: "Greedy bitwise trie-like approach.",
+  topic: "Bit Manipulation",
+  difficulty: "Hard",
+  timeComplexity: "O(n·logM)",
+  spaceComplexity: "O(n)",
+  tags: ["bit manipulation","XOR"],
+},
+
+// ── Math ─────────────────────────────────────────────────
+{
+  dsaNumber: 70,
+  title: "Integer to Roman",
+  problem: "Convert integer to Roman numeral.",
+  solution: `function intToRoman(num){
+    const vals=[1000,900,500,400,100,90,50,40,10,9,5,4,1];
+    const syms=["M","CM","D","CD","C","XC","L","XL","X","IX","V","IV","I"];
+    let res="";
+    for(let i=0;i<vals.length;i++)
+      while(num>=vals[i]){res+=syms[i];num-=vals[i];}
+    return res;
+  }`,
+  approach: "Greedy subtraction using Roman numeral values.",
+  topic: "Math",
+  difficulty: "Medium",
+  timeComplexity: "O(1)",
+  spaceComplexity: "O(1)",
+  tags: ["math","roman numerals"],
+},
+
+{
+  dsaNumber: 71,
+  title: "Roman to Integer",
+  problem: "Convert Roman numeral to integer.",
+  solution: `function romanToInt(s){
+    const map={I:1,V:5,X:10,L:50,C:100,D:500,M:1000};
+    let res=0;
+    for(let i=0;i<s.length;i++){
+      if(i<s.length-1&&map[s[i]]<map[s[i+1]]) res-=map[s[i]];
+      else res+=map[s[i]];
+    }
+    return res;
+  }`,
+  approach: "Check subtraction cases by comparing adjacent symbols.",
+  topic: "Math",
+  difficulty: "Easy",
+  timeComplexity: "O(n)",
+  spaceComplexity: "O(1)",
+  tags: ["math","roman numerals"],
+},
+
+// ── Matrix ───────────────────────────────────────────────
+{
+  dsaNumber: 72,
+  title: "Set Matrix Zeroes",
+  problem: "If element is 0, set entire row and column to 0.",
+  solution: `function setZeroes(matrix){
+    const rows=new Set(),cols=new Set();
+    for(let i=0;i<matrix.length;i++)
+      for(let j=0;j<matrix[0].length;j++)
+        if(matrix[i][j]===0){rows.add(i);cols.add(j);}
+    for(const r of rows) for(let j=0;j<matrix[0].length;j++) matrix[r][j]=0;
+    for(const c of cols) for(let i=0;i<matrix.length;i++) matrix[i][c]=0;
+  }`,
+  approach: "Track rows and columns with zero, then update.",
+  topic: "Matrix",
+  difficulty: "Medium",
+  timeComplexity: "O(m·n)",
+  spaceComplexity: "O(m+n)",
+  tags: ["matrix","array"],
+},
+
+{
+  dsaNumber: 73,
+  title: "Game of Life",
+  problem: "Implement Conway’s Game of Life rules.",
+  solution: `function gameOfLife(board){
+    const dirs=[[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+    const copy=board.map(r=>[...r]);
+    for(let i=0;i<board.length;i++)
+      for(let j=0;j<board[0].length;j++){
+        let live=0;
+        for(const [dx,dy] of dirs){
+          const x=i+dx,y=j+dy;
+          if(x>=0&&y>=0&&x<board.length&&y<board[0].length&&copy[x][y]===1) live++;
+        }
+        if(copy[i][j]===1&&(live<2||live>3)) board[i][j]=0;
+        if(copy[i][j]===0&&live===3) board[i][j]=1;
+      }
+  }`,
+  approach: "Simulate rules with copy of board.",
+  topic: "Matrix",
+  difficulty: "Medium",
+  timeComplexity: "O(m·n)",
+  spaceComplexity: "O(m·n)",
+  tags: ["matrix","simulation"],
+},
+
+// ── Design ───────────────────────────────────────────────
+{
+  dsaNumber: 74,
+  title: "LRU Cache",
+  problem: "Design LRU cache with get and put in O(1).",
+  solution: `class LRUCache{
+    constructor(cap){this.cap=cap;this.map=new Map();}
+    get(key){
+      if(!this.map.has(key)) return -1;
+      const val=this.map.get(key);
+      this.map.delete(key);this.map.set(key,val);
+      return val;
+    }
+    put(key,val){
+      if(this.map.has(key)) this.map.delete(key);
+      else if(this.map.size===this.cap) this.map.delete(this.map.keys().next().value);
+      this.map.set(key,val);
+    }
+  }`,
+  approach: "Use Map with insertion order to simulate LRU.",
+  topic: "Design",
+  difficulty: "Medium",
+  timeComplexity: "O(1)",
+  spaceComplexity: "O(capacity)",
+  tags: ["design","cache","LRU"],
+},
+
+{
+  dsaNumber: 75,
+  title: "Implement Trie",
+  problem: "Implement Trie with insert, search, startsWith.",
+  solution: `class Trie{
+    constructor(){this.root={};}
+    insert(word){
+      let node=this.root;
+      for(const c of word){if(!node[c]) node[c]={};node=node[c];}
+      node.end=true;
+    }
+    search(word){
+      let node=this.root;
+      for(const c of word){if(!node[c]) return false;node=node[c];}
+      return !!node.end;
+    }
+    startsWith(prefix){
+      let node=this.root;
+      for(const c of prefix){if(!node[c]) return false;node=node[c];}
+      return true;
+    }
+  }`,
+  approach: "Nested objects to represent trie nodes.",
+  topic: "Design",
+  difficulty: "Medium",
+  timeComplexity: "O(n)",
+  spaceComplexity: "O(n)",
+  tags: ["trie","prefix tree"],
+},
+
+// ── Advanced Graphs ──────────────────────────────────────
+// ── Advanced Graphs ──────────────────────────────────────
+{
+  dsaNumber: 76,
+  title: "Bellman-Ford Algorithm",
+  problem: "Compute shortest paths from source to all vertices in weighted graph (may contain negative edges).",
+  solution: `function bellmanFord(n,edges,src){
+    const dist=Array(n).fill(Infinity);
+    dist[src]=0;
+    for(let i=0;i<n-1;i++){
+      for(const [u,v,w] of edges){
+        if(dist[u]+w<dist[v]) dist[v]=dist[u]+w;
+      }
+    }
+    return dist;
+  }`,
+  approach: "Relax all edges n-1 times; works with negative weights.",
+  topic: "Graphs",
+  difficulty: "Medium",
+  timeComplexity: "O(V·E)",
+  spaceComplexity: "O(V)",
+  tags: ["graph","shortest path","Bellman-Ford"],
+},
+
+{
+  dsaNumber: 77,
+  title: "Floyd-Warshall Algorithm",
+  problem: "Find shortest paths between all pairs of vertices.",
+  solution: `function floydWarshall(matrix){
+    const n=matrix.length;
+    for(let k=0;k<n;k++)
+      for(let i=0;i<n;i++)
+        for(let j=0;j<n;j++)
+          if(matrix[i][k]+matrix[k][j]<matrix[i][j])
+            matrix[i][j]=matrix[i][k]+matrix[k][j];
+    return matrix;
+  }`,
+  approach: "Dynamic programming over intermediate vertices.",
+  topic: "Graphs",
+  difficulty: "Hard",
+  timeComplexity: "O(V³)",
+  spaceComplexity: "O(V²)",
+  tags: ["graph","shortest path","Floyd-Warshall"],
+},
+
+// ── Matrix ───────────────────────────────────────────────
+{
+  dsaNumber: 78,
+  title: "Search a 2D Matrix",
+  problem: "Search target in matrix with sorted rows and columns.",
+  solution: `function searchMatrix(matrix,target){
+    let r=0,c=matrix[0].length-1;
+    while(r<matrix.length&&c>=0){
+      if(matrix[r][c]===target) return true;
+      if(matrix[r][c]>target) c--; else r++;
+    }
+    return false;
+  }`,
+  approach: "Start from top-right; eliminate row or column each step.",
+  topic: "Matrix",
+  difficulty: "Medium",
+  timeComplexity: "O(m+n)",
+  spaceComplexity: "O(1)",
+  tags: ["matrix","search"],
+},
+
+{
+  dsaNumber: 79,
+  title: "Maximal Rectangle",
+  problem: "Find largest rectangle containing only 1s in binary matrix.",
+  solution: `function maximalRectangle(matrix){
+    if(!matrix.length) return 0;
+    const n=matrix[0].length;
+    const heights=Array(n).fill(0);
+    let max=0;
+    for(const row of matrix){
+      for(let i=0;i<n;i++) heights[i]=row[i]==="1"?heights[i]+1:0;
+      max=Math.max(max,largestRectangleArea(heights));
+    }
+    return max;
+  }
+  function largestRectangleArea(h){
+    const stack=[],res=0;
+    for(let i=0;i<=h.length;i++){
+      const curr=i===h.length?0:h[i];
+      while(stack.length&&curr<h[stack[stack.length-1]]){
+        const height=h[stack.pop()];
+        const width=stack.length?i-stack[stack.length-1]-1:i;
+        res=Math.max(res,height*width);
+      }
+      stack.push(i);
+    }
+    return res;
+  }`,
+  approach: "Use histogram technique row by row.",
+  topic: "Matrix",
+  difficulty: "Hard",
+  timeComplexity: "O(m·n)",
+  spaceComplexity: "O(n)",
+  tags: ["matrix","stack","rectangle"],
+},
+
+// ── Bit Manipulation ─────────────────────────────────────
+{
+  dsaNumber: 80,
+  title: "Counting Bits",
+  problem: "Given integer n, return array of number of 1s in binary representation for 0..n.",
+  solution: `function countBits(n){
+    const res=[0];
+    for(let i=1;i<=n;i++) res[i]=res[i>>1]+(i&1);
+    return res;
+  }`,
+  approach: "DP relation: bits(i)=bits(i>>1)+(i&1).",
+  topic: "Bit Manipulation",
+  difficulty: "Easy",
+  timeComplexity: "O(n)",
+  spaceComplexity: "O(n)",
+  tags: ["bit manipulation","DP"],
+},
+// ── Arrays ────────────────────────────────────────────────
+{
+  dsaNumber: 81,
+  title: "Majority Element",
+  problem: "Find the element that appears more than ⌊n/2⌋ times in the array.",
+  solution: `function majorityElement(nums){
+    let count=0,candidate=null;
+    for(const n of nums){
+      if(count===0) candidate=n;
+      count+=(n===candidate?1:-1);
+    }
+    return candidate;
+  }`,
+  approach: "Boyer-Moore Voting Algorithm.",
+  topic: "Arrays",
+  difficulty: "Easy",
+  timeComplexity: "O(n)",
+  spaceComplexity: "O(1)",
+  tags: ["array","majority","Boyer-Moore"],
+},
+
+// ── Strings ───────────────────────────────────────────────
+{
+  dsaNumber: 82,
+  title: "Longest Common Prefix",
+  problem: "Find longest common prefix among array of strings.",
+  solution: `function longestCommonPrefix(strs){
+    if(!strs.length) return "";
+    let prefix=strs[0];
+    for(let i=1;i<strs.length;i++){
+      while(strs[i].indexOf(prefix)!==0){
+        prefix=prefix.slice(0,prefix.length-1);
+        if(!prefix) return "";
+      }
+    }
+    return prefix;
+  }`,
+  approach: "Iteratively shrink prefix until all strings match.",
+  topic: "Strings",
+  difficulty: "Easy",
+  timeComplexity: "O(n·m)",
+  spaceComplexity: "O(1)",
+  tags: ["string","prefix"],
+},
+
+// ── Bit Manipulation ─────────────────────────────────────
+{
+  dsaNumber: 83,
+  title: "Gray Code",
+  problem: "Generate n-bit Gray code sequence.",
+  solution: `function grayCode(n){
+    const res=[0];
+    for(let i=0;i<n;i++){
+      const add=1<<i;
+      for(let j=res.length-1;j>=0;j--) res.push(res[j]+add);
+    }
+    return res;
+  }`,
+  approach: "Reflect and prefix method.",
+  topic: "Bit Manipulation",
+  difficulty: "Medium",
+  timeComplexity: "O(2^n)",
+  spaceComplexity: "O(2^n)",
+  tags: ["bit manipulation","gray code"],
+},
+
+// ── Matrix ───────────────────────────────────────────────
+{
+  dsaNumber: 84,
+  title: "Rotate Image Counterclockwise",
+  problem: "Rotate n×n matrix by 90 degrees counterclockwise.",
+  solution: `function rotateCounter(matrix){
+    const n=matrix.length;
+    for(let i=0;i<n;i++)
+      for(let j=i;j<n;j++)
+        [matrix[i][j],matrix[j][i]]=[matrix[j][i],matrix[i][j]];
+    matrix.reverse();
+  }`,
+  approach: "Transpose then reverse rows.",
+  topic: "Matrix",
+  difficulty: "Medium",
+  timeComplexity: "O(n²)",
+  spaceComplexity: "O(1)",
+  tags: ["matrix","rotation"],
+},
+
+// ── Design ───────────────────────────────────────────────
+{
+  dsaNumber: 85,
+  title: "Design HashMap",
+  problem: "Implement HashMap with put, get, remove.",
+  solution: `class MyHashMap{
+    constructor(){this.map={};}
+    put(key,value){this.map[key]=value;}
+    get(key){return this.map.hasOwnProperty(key)?this.map[key]:-1;}
+    remove(key){delete this.map[key];}
+  }`,
+  approach: "Use object as key-value store.",
+  topic: "Design",
+  difficulty: "Easy",
+  timeComplexity: "O(1)",
+  spaceComplexity: "O(n)",
+  tags: ["design","hash map"],
+},
+// ── Arrays ────────────────────────────────────────────────
+{
+  dsaNumber: 86,
+  title: "Maximum Product Subarray",
+  problem: "Find contiguous subarray with maximum product.",
+  solution: `function maxProduct(nums){
+    let max=nums[0],min=nums[0],res=nums[0];
+    for(let i=1;i<nums.length;i++){
+      if(nums[i]<0)[max,min]=[min,max];
+      max=Math.max(nums[i],max*nums[i]);
+      min=Math.min(nums[i],min*nums[i]);
+      res=Math.max(res,max);
+    }
+    return res;
+  }`,
+  approach: "Track both max and min products due to negatives.",
+  topic: "Arrays",
+  difficulty: "Medium",
+  timeComplexity: "O(n)",
+  spaceComplexity: "O(1)",
+  tags: ["array","dynamic programming"],
+},
+
+// ── Strings ───────────────────────────────────────────────
+{
+  dsaNumber: 87,
+  title: "Minimum Edit Distance (Levenshtein)",
+  problem: "Find minimum operations to convert one string to another.",
+  solution: `function minDistance(a,b){
+    const m=a.length,n=b.length;
+    const dp=Array.from({length:m+1},()=>Array(n+1).fill(0));
+    for(let i=0;i<=m;i++) dp[i][0]=i;
+    for(let j=0;j<=n;j++) dp[0][j]=j;
+    for(let i=1;i<=m;i++)
+      for(let j=1;j<=n;j++)
+        dp[i][j]=a[i-1]===b[j-1]?dp[i-1][j-1]:
+          1+Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]);
+    return dp[m][n];
+  }`,
+  approach: "Dynamic programming table for edit distance.",
+  topic: "Strings",
+  difficulty: "Hard",
+  timeComplexity: "O(m·n)",
+  spaceComplexity: "O(m·n)",
+  tags: ["string","DP","edit distance"],
+},
+
+// ── Linked Lists ──────────────────────────────────────────
+{
+  dsaNumber: 88,
+  title: "Flatten Multilevel Doubly Linked List",
+  problem: "Flatten a multilevel doubly linked list.",
+  solution: `function flatten(head){
+    let curr=head;
+    while(curr){
+      if(curr.child){
+        let next=curr.next;
+        let child=flatten(curr.child);
+        curr.next=child;child.prev=curr;curr.child=null;
+        while(curr.next) curr=curr.next;
+        if(next){curr.next=next;next.prev=curr;}
+      }
+      curr=curr.next;
+    }
+    return head;
+  }`,
+  approach: "DFS flatten child lists inline.",
+  topic: "Linked Lists",
+  difficulty: "Medium",
+  timeComplexity: "O(n)",
+  spaceComplexity: "O(n)",
+  tags: ["linked list","DFS"],
+},
+
+// ── Stacks & Queues ───────────────────────────────────────
+{
+  dsaNumber: 89,
+  title: "Largest Rectangle in Histogram",
+  problem: "Find largest rectangle in histogram.",
+  solution: `function largestRectangleArea(h){
+    const stack=[],res=0;
+    for(let i=0;i<=h.length;i++){
+      const curr=i===h.length?0:h[i];
+      while(stack.length&&curr<h[stack[stack.length-1]]){
+        const height=h[stack.pop()];
+        const width=stack.length?i-stack[stack.length-1]-1:i;
+        res=Math.max(res,height*width);
+      }
+      stack.push(i);
+    }
+    return res;
+  }`,
+  approach: "Monotonic stack to compute max area.",
+  topic: "Stacks & Queues",
+  difficulty: "Hard",
+  timeComplexity: "O(n)",
+  spaceComplexity: "O(n)",
+  tags: ["stack","histogram"],
+},
+
+// ── Trees ─────────────────────────────────────────────────
+{
+  dsaNumber: 90,
+  title: "Diameter of Binary Tree",
+  problem: "Find length of longest path between any two nodes.",
+  solution: `function diameterOfBinaryTree(root){
+    let max=0;
+    function depth(node){
+      if(!node) return 0;
+      const l=depth(node.left),r=depth(node.right);
+      max=Math.max(max,l+r);
+      return 1+Math.max(l,r);
+    }
+    depth(root);
+    return max;
+  }`,
+  approach: "DFS computing depth and updating diameter.",
+  topic: "Trees",
+  difficulty: "Easy",
+  timeComplexity: "O(n)",
+  spaceComplexity: "O(h)",
+  tags: ["tree","DFS","diameter"],
+},
+
+// ── Graphs ───────────────────────────────────────────────
+{
+  dsaNumber: 91,
+  title: "Detect Bipartite Graph",
+  problem: "Check if graph is bipartite.",
+  solution: `function isBipartite(graph){
+    const color=Array(graph.length).fill(0);
+    const dfs=(node,c)=>{
+      if(color[node]) return color[node]===c;
+      color[node]=c;
+      for(const nei of graph[node])
+        if(!dfs(nei,-c)) return false;
+      return true;
+    };
+    for(let i=0;i<graph.length;i++)
+      if(!color[i]&&!dfs(i,1)) return false;
+    return true;
+  }`,
+  approach: "DFS coloring with two colors.",
+  topic: "Graphs",
+  difficulty: "Medium",
+  timeComplexity: "O(V+E)",
+  spaceComplexity: "O(V)",
+  tags: ["graph","DFS","bipartite"],
+},
+
+// ── Dynamic Programming ──────────────────────────────────
+{
+  dsaNumber: 92,
+  title: "House Robber",
+  problem: "Max money without robbing adjacent houses.",
+  solution: `function rob(nums){
+    let prev=0,curr=0;
+    for(const n of nums)[prev,curr]=[curr,Math.max(curr,prev+n)];
+    return curr;
+  }`,
+  approach: "DP with rolling variables.",
+  topic: "Dynamic Programming",
+  difficulty: "Easy",
+  timeComplexity: "O(n)",
+  spaceComplexity: "O(1)",
+  tags: ["DP","array"],
+},
+
+{
+  dsaNumber: 93,
+  title: "Word Break",
+  problem: "Check if string can be segmented into dictionary words.",
+  solution: `function wordBreak(s,dict){
+    const set=new Set(dict);
+    const dp=Array(s.length+1).fill(false);
+    dp[0]=true;
+    for(let i=1;i<=s.length;i++)
+      for(let j=0;j<i;j++)
+        if(dp[j]&&set.has(s.slice(j,i))){dp[i]=true;break;}
+    return dp[s.length];
+  }`,
+  approach: "DP checking substrings.",
+  topic: "Dynamic Programming",
+  difficulty: "Medium",
+  timeComplexity: "O(n²)",
+  spaceComplexity: "O(n)",
+  tags: ["DP","string"],
+},
+
+// ── Sorting & Searching ──────────────────────────────────
+{
+  dsaNumber: 94,
+  title: "Kth Smallest Element in BST",
+  problem: "Find kth smallest element in BST.",
+  solution: `function kthSmallest(root,k){
+    const stack=[];
+    while(true){
+      while(root){stack.push(root);root=root.left;}
+      root=stack.pop();
+      if(--k===0) return root.val;
+      root=root.right;
+    }
+  }`,
+  approach: "Inorder traversal with stack.",
+  topic: "Sorting & Searching",
+  difficulty: "Medium",
+  timeComplexity: "O(n)",
+  spaceComplexity: "O(h)",
+  tags: ["BST","inorder"],
+},
+
+{
+  dsaNumber: 95,
+  title: "Search Insert Position",
+  problem: "Return index if target found, else insert position.",
+  solution: `function searchInsert(nums,target){
+    let l=0,r=nums.length-1;
+    while(l<=r){
+      const mid=Math.floor((l+r)/2);
+      if(nums[mid]===target) return mid;
+      if(nums[mid]<target) l=mid+1; else r=mid-1;
+    }
+    return l;
+  }`,
+  approach: "Binary search for insertion point.",
+  topic: "Sorting & Searching",
+  difficulty: "Easy",
+  timeComplexity: "O(log n)",
+  spaceComplexity: "O(1)",
+  tags: ["binary search","array"],
+},
+// ── Recursion ────────────────────────────────────────────
+{
+  dsaNumber: 96,
+  title: "N-Queens",
+  problem: "Return all distinct solutions to the n-queens puzzle.",
+  solution: `function solveNQueens(n){
+    const res=[],board=Array(n).fill().map(()=>Array(n).fill("."));
+    const cols=new Set(),diag1=new Set(),diag2=new Set();
+    function backtrack(r){
+      if(r===n){res.push(board.map(row=>row.join("")));return;}
+      for(let c=0;c<n;c++){
+        if(cols.has(c)||diag1.has(r-c)||diag2.has(r+c)) continue;
+        board[r][c]="Q";cols.add(c);diag1.add(r-c);diag2.add(r+c);
+        backtrack(r+1);
+        board[r][c]=".";cols.delete(c);diag1.delete(r-c);diag2.delete(r+c);
+      }
+    }
+    backtrack(0);
+    return res;
+  }`,
+  approach: "Backtracking with sets to track column and diagonal conflicts.",
+  topic: "Recursion",
+  difficulty: "Hard",
+  timeComplexity: "O(n!)",
+  spaceComplexity: "O(n²)",
+  tags: ["recursion","backtracking","n-queens"],
+},
+
+// ── Backtracking ─────────────────────────────────────────
+{
+  dsaNumber: 97,
+  title: "Word Search",
+  problem: "Given a board and a word, check if the word exists in the grid.",
+  solution: `function exist(board,word){
+    const m=board.length,n=board[0].length;
+    const dfs=(i,j,k)=>{
+      if(k===word.length) return true;
+      if(i<0||j<0||i>=m||j>=n||board[i][j]!==word[k]) return false;
+      const tmp=board[i][j];board[i][j]="#";
+      const found=dfs(i+1,j,k+1)||dfs(i-1,j,k+1)||dfs(i,j+1,k+1)||dfs(i,j-1,k+1);
+      board[i][j]=tmp;
+      return found;
+    };
+    for(let i=0;i<m;i++)for(let j=0;j<n;j++)
+      if(dfs(i,j,0)) return true;
+    return false;
+  }`,
+  approach: "Backtracking DFS with visited marking.",
+  topic: "Backtracking",
+  difficulty: "Medium",
+  timeComplexity: "O(m·n·4^L)",
+  spaceComplexity: "O(L)",
+  tags: ["backtracking","DFS","matrix"],
+},
+
+// ── Greedy ───────────────────────────────────────────────
+{
+  dsaNumber: 98,
+  title: "Candy",
+  problem: "Distribute candies to children based on ratings with minimum candies.",
+  solution: `function candy(ratings){
+    const n=ratings.length;
+    const candies=Array(n).fill(1);
+    for(let i=1;i<n;i++) if(ratings[i]>ratings[i-1]) candies[i]=candies[i-1]+1;
+    for(let i=n-2;i>=0;i--) if(ratings[i]>ratings[i+1]) candies[i]=Math.max(candies[i],candies[i+1]+1);
+    return candies.reduce((a,b)=>a+b,0);
+  }`,
+  approach: "Two passes: left-to-right and right-to-left.",
+  topic: "Greedy",
+  difficulty: "Hard",
+  timeComplexity: "O(n)",
+  spaceComplexity: "O(n)",
+  tags: ["greedy","array","distribution"],
+},
+
+// ── Math ─────────────────────────────────────────────────
+{
+  dsaNumber: 99,
+  title: "Happy Number",
+  problem: "Determine if a number is happy (sum of squares of digits eventually equals 1).",
+  solution: `function isHappy(n){
+    const seen=new Set();
+    const next=x=>x.toString().split("").reduce((a,b)=>a+b*b,0);
+    while(n!==1&&!seen.has(n)){seen.add(n);n=next(n);}
+    return n===1;
+  }`,
+  approach: "Iteratively compute sum of squares of digits; detect cycles with set.",
+  topic: "Math",
+  difficulty: "Easy",
+  timeComplexity: "O(log n)",
+  spaceComplexity: "O(log n)",
+  tags: ["math","cycle detection"],
+},
+
+// ── Design ───────────────────────────────────────────────
+{
+  dsaNumber: 100,
+  title: "Design MinStack with O(1) getMin",
+  problem: "Implement stack supporting push, pop, top, and getMin in O(1).",
+  solution: `class MinStack{
+    constructor(){this.stack=[];this.min=[];}
+    push(x){this.stack.push(x);this.min.push(this.min.length?Math.min(x,this.min[this.min.length-1]):x);}
+    pop(){this.stack.pop();this.min.pop();}
+    top(){return this.stack[this.stack.length-1];}
+    getMin(){return this.min[this.min.length-1];}
+  }`,
+  approach: "Maintain auxiliary stack for minimums.",
+  topic: "Design",
+  difficulty: "Medium",
+  timeComplexity: "O(1)",
+  spaceComplexity: "O(n)",
+  tags: ["design","stack","min stack"],
+},
 
 ];
 
-// ── More DP, Greedy, Backtracking, etc. ─────────────────────
-// (31–50 continue in same style: e.g., Edit Distance, Longest Pal
 
 module.exports = dsaQuestions;
