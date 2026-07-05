@@ -1,77 +1,124 @@
 const express = require("express");
-const jwt = require("jsonwebtoken");
+const authMiddleware = require("../middleware/authMiddleware");
 const User = require("../models/User");
 const InterviewQuestion = require("../models/InterviewQuestion");
 const DSAQuestion = require("../models/DSAQuestion");
+const MCQQuestion = require("../models/MCQQuestion");
 
 const router = express.Router();
 
-function requireAuth(req, res, next) {
-  const auth = req.headers.authorization;
-  if (!auth || !auth.startsWith("Bearer "))
-    return res.status(401).json({ message: "Unauthorized" });
+// GET /api/profile - Fetch user profile with stats
+router.get("/", authMiddleware, async (req, res) => {
   try {
-    req.userId = jwt.verify(auth.slice(7), process.env.JWT_SECRET).id;
-    next();
-  } catch {
-    res.status(401).json({ message: "Invalid token" });
-  }
-}
+    const userId = req.user.id;
+    const user = await User.findById(userId).select("-password");
 
-// GET /api/profile — full profile + stats
-router.get("/", requireAuth, async (req, res) => {
-  try {
-    const user = await User.findById(req.userId).select("-password");
-    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
 
+    // ===== INTERVIEW QUESTIONS STATS =====
     const totalQuestions = await InterviewQuestion.countDocuments();
-    const totalDSA = await DSAQuestion.countDocuments();
+    const seenQuestionsCount = user.seenQuestions.length;
 
-    // Per-category seen counts for interview questions
-    const allQuestions = await InterviewQuestion.find({}, "questionNumber category difficulty");
-    const seenSet = new Set(user.seenQuestions);
+    // Category-wise breakdown
+    const allQuestions = await InterviewQuestion.find().select("questionNumber category");
     const categoryStats = {};
-    for (const q of allQuestions) {
-      if (!categoryStats[q.category])
-        categoryStats[q.category] = { total: 0, seen: 0 };
-      categoryStats[q.category].total++;
-      if (seenSet.has(q.questionNumber)) categoryStats[q.category].seen++;
-    }
 
-    // Per-topic DSA stats
-    const allDSA = await DSAQuestion.find({}, "dsaNumber topic difficulty");
-    const seenDSASet = new Set(user.seenDSA);
-    const solvedDSASet = new Set(user.solvedDSA);
+    allQuestions.forEach((q) => {
+      if (!categoryStats[q.category]) {
+        categoryStats[q.category] = { seen: 0, total: 0 };
+      }
+      categoryStats[q.category].total += 1;
+
+      if (user.seenQuestions.includes(q.questionNumber)) {
+        categoryStats[q.category].seen += 1;
+      }
+    });
+
+    const questions = {
+      seen: seenQuestionsCount,
+      total: totalQuestions,
+      categoryStats: categoryStats,
+    };
+
+    // ===== DSA STATS =====
+    const totalDSA = await DSAQuestion.countDocuments();
+    const seenDSACount = user.seenDSA.length;
+    const solvedDSACount = user.solvedDSA.length;
+
+    // Topic-wise breakdown
+    const allDSA = await DSAQuestion.find().select("dsaNumber topic");
     const topicStats = {};
-    for (const p of allDSA) {
-      if (!topicStats[p.topic])
-        topicStats[p.topic] = { total: 0, seen: 0, solved: 0 };
-      topicStats[p.topic].total++;
-      if (seenDSASet.has(p.dsaNumber)) topicStats[p.topic].seen++;
-      if (solvedDSASet.has(p.dsaNumber)) topicStats[p.topic].solved++;
-    }
+
+    allDSA.forEach((d) => {
+      if (!topicStats[d.topic]) {
+        topicStats[d.topic] = { seen: 0, solved: 0, total: 0 };
+      }
+      topicStats[d.topic].total += 1;
+
+      if (user.seenDSA.includes(d.dsaNumber)) {
+        topicStats[d.topic].seen += 1;
+      }
+
+      if (user.solvedDSA.includes(d.dsaNumber)) {
+        topicStats[d.topic].solved += 1;
+      }
+    });
+
+    const dsa = {
+      seen: seenDSACount,
+      solved: solvedDSACount,
+      total: totalDSA,
+      topicStats: topicStats,
+    };
+
+    // ===== MCQ STATS =====
+    const totalMCQ = await MCQQuestion.countDocuments();
+    const attemptedMCQCount = user.mcqAttempted.length;
+    const solvedMCQCount = user.mcqSolved.length;
+
+    // Category-wise breakdown
+    const allMCQ = await MCQQuestion.find().select("questionId category");
+    const mcqCategoryStats = {};
+
+    allMCQ.forEach((m) => {
+      if (!mcqCategoryStats[m.category]) {
+        mcqCategoryStats[m.category] = { attempted: 0, solved: 0, total: 0 };
+      }
+      mcqCategoryStats[m.category].total += 1;
+
+      if (user.mcqAttempted.includes(m.questionId)) {
+        mcqCategoryStats[m.category].attempted += 1;
+      }
+
+      if (user.mcqSolved.includes(m.questionId)) {
+        mcqCategoryStats[m.category].solved += 1;
+      }
+    });
+
+    const mcq = {
+      attempted: attemptedMCQCount,
+      solved: solvedMCQCount,
+      total: totalMCQ,
+      categoryStats: mcqCategoryStats,
+    };
 
     res.json({
+      success: true,
       user: {
         id: user._id,
         name: user.name,
         email: user.email,
         createdAt: user.createdAt,
       },
-      questions: {
-        total: totalQuestions,
-        seen: user.seenQuestions.length,
-        categoryStats,
-      },
-      dsa: {
-        total: totalDSA,
-        seen: user.seenDSA.length,
-        solved: user.solvedDSA.length,
-        topicStats,
-      },
+      questions: questions,
+      dsa: dsa,
+      mcq: mcq,
     });
-  } catch (err) {
-    res.status(500).json({ message: "Server error", error: err.message });
+  } catch (error) {
+    console.error("Error fetching profile:", error);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 

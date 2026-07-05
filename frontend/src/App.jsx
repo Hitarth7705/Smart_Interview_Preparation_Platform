@@ -6,6 +6,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import Questions from "./pages/Questions";
 import DSA from "./pages/DSA";
 import Profile from "./pages/Profile";
+import QuizPage from "./pages/QuizPage";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/questions" element={<Questions />} />
         <Route path="/dsa" element={<DSA />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/quiz" element={<QuizPage />} />
       </Routes>
     </BrowserRouter>
   );

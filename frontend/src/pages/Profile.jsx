@@ -10,6 +10,13 @@ const CATEGORY_COLORS = {
   Behavioral: "#0ea5e9", Database: "#14b8a6",
 };
 
+const MCQ_COLORS = {
+  Arrays: "#3b82f6", Strings: "#8b5cf6", Trees: "#10b981", 
+  Graphs: "#06b6d4", "Dynamic Programming": "#6366f1", 
+  "Sorting & Searching": "#f59e0b", "Linked Lists": "#ec4899",
+  "Stacks & Queues": "#f97316", Hashing: "#14b8a6", "System Design": "#f97316",
+};
+
 const TOPIC_COLORS = {
   Arrays: "#3b82f6", Strings: "#8b5cf6", "Linked Lists": "#ec4899",
   "Stacks & Queues": "#f97316", Trees: "#10b981", Graphs: "#06b6d4",
@@ -71,13 +78,14 @@ export default function Profile() {
   if (loading) return <Centered msg="Loading profile…" />;
   if (error)   return <Centered msg={error} color="#ef4444" />;
 
-  const { user, questions, dsa } = data;
+  const { user, questions, dsa, mcq } = data;
   const memberSince = new Date(user.createdAt).toLocaleDateString("en-IN", {
     year: "numeric", month: "long", day: "numeric",
   });
 
   const qPct  = questions.total ? Math.round((questions.seen  / questions.total) * 100) : 0;
   const dsaPct = dsa.total      ? Math.round((dsa.solved / dsa.total) * 100) : 0;
+  const mcqPct = mcq.total      ? Math.round((mcq.solved / mcq.total) * 100) : 0;
 
   return (
     <div style={styles.page}>
@@ -88,6 +96,7 @@ export default function Profile() {
           <Link to="/dashboard" style={styles.navLink}>Dashboard</Link>
           <Link to="/questions" style={styles.navLink}>Questions</Link>
           <Link to="/dsa"       style={styles.navLink}>DSA</Link>
+          <Link to="/quiz"      style={styles.navLink}>MCQ</Link>
         </div>
       </div>
 
@@ -109,6 +118,7 @@ export default function Profile() {
           <StatCard icon="📚" label="Questions Seen"   value={`${questions.seen} / ${questions.total}`} sub={`${qPct}% complete`} color="#11998e" />
           <StatCard icon="🧠" label="DSA Seen"         value={`${dsa.seen} / ${dsa.total}`}             sub={`${dsa.total - dsa.seen} remaining`} color="#6366f1" />
           <StatCard icon="✅" label="DSA Solved"       value={`${dsa.solved} / ${dsa.total}`}           sub={`${dsaPct}% solved`} color="#16a34a" />
+          <StatCard icon="🎯" label="MCQ Solved"       value={`${mcq.solved} / ${mcq.total}`}           sub={`${mcqPct}% solved`} color="#0ea5e9" />
         </div>
 
         {/* Interview Questions Breakdown */}
@@ -164,21 +174,50 @@ export default function Profile() {
           </div>
         </div>
 
+        {/* MCQ Breakdown */}
+        <div style={styles.card}>
+          <h3 style={styles.sectionTitle}>🎯 MCQ Quiz by Category</h3>
+          <div style={styles.breakdownGrid}>
+            {Object.entries(mcq.categoryStats)
+              .sort((a, b) => b[1].solved - a[1].solved)
+              .map(([category, stat]) => (
+                <div key={category} style={styles.breakdownItem}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                    <span style={{
+                      display: "inline-block",
+                      width: 10, height: 10, borderRadius: "50%",
+                      background: MCQ_COLORS[category] || "#6366f1",
+                      marginRight: 6, flexShrink: 0, marginTop: 3,
+                    }} />
+                    <span style={{ flex: 1, fontWeight: 600, fontSize: 13, color: "#1e293b" }}>{category}</span>
+                    <span style={{ fontSize: 12, color: "#64748b" }}>{stat.solved}✅ {stat.attempted}👁️/{stat.total}</span>
+                  </div>
+                  <ProgressBar
+                    seen={stat.attempted}
+                    solved={stat.solved}
+                    total={stat.total}
+                    color={MCQ_COLORS[category] || "#6366f1"}
+                  />
+                </div>
+              ))}
+          </div>
+        </div>
+
         {/* Overall progress summary */}
         <div style={{ ...styles.card, background: "linear-gradient(135deg, #1e293b, #334155)", color: "white" }}>
           <h3 style={{ margin: "0 0 16px", color: "white" }}>🏆 Overall Progress</h3>
           <div style={styles.overallGrid}>
             <div style={styles.overallStat}>
-              <div style={styles.overallNum}>{questions.seen + dsa.seen}</div>
+              <div style={styles.overallNum}>{questions.seen + dsa.seen + mcq.attempted}</div>
               <div style={styles.overallLabel}>Total Items Seen</div>
             </div>
             <div style={styles.overallStat}>
-              <div style={{ ...styles.overallNum, color: "#4ade80" }}>{dsa.solved}</div>
-              <div style={styles.overallLabel}>DSA Problems Solved</div>
+              <div style={{ ...styles.overallNum, color: "#4ade80" }}>{dsa.solved + mcq.solved}</div>
+              <div style={styles.overallLabel}>Problems Solved</div>
             </div>
             <div style={styles.overallStat}>
               <div style={{ ...styles.overallNum, color: "#60a5fa" }}>
-                {questions.total + dsa.total - questions.seen - dsa.seen}
+                {questions.total + dsa.total + mcq.total - questions.seen - dsa.seen - mcq.attempted}
               </div>
               <div style={styles.overallLabel}>Still To Explore</div>
             </div>

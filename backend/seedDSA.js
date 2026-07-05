@@ -1,6 +1,7 @@
-// Run this script once to seed DSA problems:
-//   cd backend
-//   node seedDSA.js
+// Add DNS fix FIRST - before anything else
+const dns = require("dns");
+dns.setDefaultResultOrder("ipv4first");
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
 require("dotenv").config();
 const mongoose = require("mongoose");

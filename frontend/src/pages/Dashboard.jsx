@@ -70,6 +70,12 @@ export default function Dashboard() {
               {stats ? `${stats.dsa.solved} / ${stats.dsa.total}` : "—"}
             </p>
           </div>
+          <div style={styles.card}>
+            <h3 style={styles.cardTitle}>MCQ Solved</h3>
+            <p style={{ ...styles.cardValue, color: "#0ea5e9" }}>
+              {stats ? `${stats.mcq.solved} / ${stats.mcq.total}` : "—"}
+            </p>
+          </div>
         </div>
 
         {/* Interview Questions */}
@@ -87,10 +93,21 @@ export default function Dashboard() {
         <div style={styles.section}>
           <h3 style={{ margin: "0 0 8px" }}>🧠 DSA Problems</h3>
           <p style={{ margin: "0 0 16px", color: "#555", fontSize: 14 }}>
-            20 curated DSA problems covering Arrays, Strings, Linked Lists, Trees, Graphs, DP, and more — with full solutions and complexity analysis.
+            50 curated DSA problems covering Arrays, Strings, Linked Lists, Trees, Graphs, DP, and more — with full solutions and complexity analysis.
           </p>
           <Link to="/dsa" style={styles.linkBtn("#6366f1", "#8b5cf6")}>
             Open DSA Problems →
+          </Link>
+        </div>
+
+        {/* MCQ Quiz */}
+        <div style={styles.section}>
+          <h3 style={{ margin: "0 0 8px" }}>🎯 MCQ Quiz</h3>
+          <p style={{ margin: "0 0 16px", color: "#555", fontSize: 14 }}>
+            50 multiple-choice questions across 10 categories (Arrays, Strings, Trees, Graphs, DP, Sorting, Linked Lists, Stacks, Hashing, System Design) with detailed explanations.
+          </p>
+          <Link to="/quiz" style={styles.linkBtn("#0ea5e9", "#06b6d4")}>
+            Start MCQ Quiz →
           </Link>
         </div>
 

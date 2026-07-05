@@ -9,6 +9,7 @@ const authRoutes = require("./routes/authRoutes");
 const questionRoutes = require("./routes/questionRoutes");
 const dsaRoutes = require("./routes/dsaRoutes");
 const profileRoutes = require("./routes/profileRoutes");
+const mcqRoutes = require("./routes/mcqRoutes");
 
 connectDB();
 
@@ -20,6 +21,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/questions", questionRoutes);
 app.use("/api/dsa", dsaRoutes);
 app.use("/api/profile", profileRoutes);
+app.use("/api/mcq", mcqRoutes);
 
 app.get("/", (req, res) => {
   res.send("API Running...");

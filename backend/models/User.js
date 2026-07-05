@@ -12,6 +12,10 @@ const userSchema = new mongoose.Schema(
     // DSA progress
     seenDSA: { type: [Number], default: [] },             // dsaNumbers seen
     solvedDSA: { type: [Number], default: [] },           // dsaNumbers marked solved
+
+    // MCQ progress
+    mcqAttempted: { type: [Number], default: [] },        // questionIds attempted
+    mcqSolved: { type: [Number], default: [] },           // questionIds solved correctly
   },
   { timestamps: true }
 );
