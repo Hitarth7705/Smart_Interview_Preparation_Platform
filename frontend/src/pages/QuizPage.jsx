@@ -10,6 +10,7 @@ const QuizPage = () => {
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState('All');
   const [categories, setCategories] = useState({});
+  const [doneQuestions, setDoneQuestions] = useState(new Set());
   const [quizStats, setQuizStats] = useState({
     correct: 0,
     incorrect: 0,
@@ -18,7 +19,7 @@ const QuizPage = () => {
   const [difficulty, setDifficulty] = useState('All');
   const userId = localStorage.getItem('userId');
 
-  // Step 1: Fetch categories on mount
+  // Fetch categories on mount
   useEffect(() => {
     console.log('📡 Fetching categories...');
     fetch('/api/mcq/meta/categories')
@@ -32,9 +33,9 @@ const QuizPage = () => {
       .catch((err) => console.error('❌ Error fetching categories:', err));
   }, []);
 
-  // Step 2: Fetch questions when category or difficulty changes
+  // Fetch questions when category or difficulty changes
   useEffect(() => {
-    if (Object.keys(categories).length === 0) return; // Wait for categories to load
+    if (Object.keys(categories).length === 0) return;
 
     console.log(`📡 Fetching questions for category: ${category}, difficulty: ${difficulty}`);
     setLoading(true);
@@ -53,6 +54,7 @@ const QuizPage = () => {
           setSelectedAnswer(null);
           setShowResult(false);
           setResult(null);
+          setDoneQuestions(new Set());
         }
       })
       .catch((err) => console.error('❌ Error fetching questions:', err))
@@ -64,6 +66,21 @@ const QuizPage = () => {
     if (!showResult) {
       setSelectedAnswer(index);
     }
+  };
+
+  // Handle "See Answer" - shows answer without marking as attempted
+  const handleSeeAnswer = () => {
+    if (!questions[currentQuestionIndex]) return;
+
+    const currentQuestion = questions[currentQuestionIndex];
+    setResult({
+      isCorrect: null,
+      userSelected: 'You peeked at the answer',
+      correctAnswer: currentQuestion.options[currentQuestion.correctAnswerIndex]?.text,
+      explanation: currentQuestion.explanation,
+    });
+    setShowResult(true);
+    setSelectedAnswer(currentQuestion.correctAnswerIndex);
   };
 
   // Handle answer submission
@@ -94,7 +111,10 @@ const QuizPage = () => {
         setResult(data);
         setShowResult(true);
 
-        // Update stats
+        const newDone = new Set(doneQuestions);
+        newDone.add(currentQuestionIndex);
+        setDoneQuestions(newDone);
+
         setQuizStats({
           ...quizStats,
           attempted: quizStats.attempted + 1,
@@ -140,6 +160,7 @@ const QuizPage = () => {
     setShowResult(false);
     setResult(null);
     setQuizStats({ correct: 0, incorrect: 0, attempted: 0 });
+    setDoneQuestions(new Set());
     setCategory('All');
     setDifficulty('All');
   };
@@ -166,10 +187,10 @@ const QuizPage = () => {
   const accuracy = quizStats.attempted > 0 
     ? ((quizStats.correct / quizStats.attempted) * 100).toFixed(2)
     : 0;
+  const isDone = doneQuestions.has(currentQuestionIndex);
 
   return (
     <div className="quiz-container">
-      {/* Header with stats */}
       <div className="quiz-header">
         <h1>MCQ Quiz</h1>
         <div className="quiz-stats">
@@ -182,13 +203,16 @@ const QuizPage = () => {
             <span className="stat-value incorrect">{quizStats.incorrect}</span>
           </div>
           <div className="stat">
+            <span className="stat-label">Done</span>
+            <span className="stat-value" style={{ color: '#10b981' }}>{doneQuestions.size}</span>
+          </div>
+          <div className="stat">
             <span className="stat-label">Accuracy</span>
             <span className="stat-value">{accuracy}%</span>
           </div>
         </div>
       </div>
 
-      {/* Filters */}
       <div className="quiz-filters">
         <div className="filter-group">
           <label>Category:</label>
@@ -217,7 +241,6 @@ const QuizPage = () => {
         </button>
       </div>
 
-      {/* Progress bar */}
       <div className="progress-container">
         <div className="progress-bar">
           <div
@@ -227,26 +250,22 @@ const QuizPage = () => {
         </div>
         <p className="progress-text">
           Question {currentQuestionIndex + 1} of {questions.length}
+          {isDone && ' ✅ Done'}
         </p>
       </div>
 
-      {/* Question Card */}
       <div className="question-card">
-        {/* Difficulty Badge */}
         <div className={`difficulty-badge ${currentQuestion.difficulty.toLowerCase()}`}>
           {currentQuestion.difficulty}
         </div>
 
-        {/* Category and Topic */}
         <div className="question-meta">
           <span className="category">{currentQuestion.category}</span>
           <span className="topic">{currentQuestion.topic}</span>
         </div>
 
-        {/* Question */}
         <h2 className="question-text">{currentQuestion.question}</h2>
 
-        {/* Options */}
         <div className="options-container">
           {currentQuestion.options.map((option, index) => {
             const isSelected = selectedAnswer === index;
@@ -283,25 +302,26 @@ const QuizPage = () => {
           })}
         </div>
 
-        {/* Result Section */}
         {showResult && result && (
-          <div className={`result-section ${result.isCorrect ? 'correct' : 'incorrect'}`}>
+          <div className={`result-section ${result.isCorrect === null ? 'peeked' : (result.isCorrect ? 'correct' : 'incorrect')}`}>
             <div className="result-header">
               <h3 className="result-title">
-                {result.isCorrect ? '✓ Correct!' : '✗ Incorrect'}
+                {result.isCorrect === null && '👀 Answer Revealed'}
+                {result.isCorrect === true && '✓ Correct!'}
+                {result.isCorrect === false && '✗ Incorrect'}
               </h3>
             </div>
 
             <div className="result-details">
               <div className="result-info">
-                <p>
-                  <strong>Your Answer:</strong> {result.userSelected}
-                </p>
-                {!result.isCorrect && (
+                {result.isCorrect !== null && (
                   <p>
-                    <strong>Correct Answer:</strong> {result.correctAnswer}
+                    <strong>Your Answer:</strong> {result.userSelected}
                   </p>
                 )}
+                <p>
+                  <strong>Correct Answer:</strong> {result.correctAnswer}
+                </p>
               </div>
 
               <div className="explanation">
@@ -313,7 +333,6 @@ const QuizPage = () => {
         )}
       </div>
 
-      {/* Navigation Buttons */}
       <div className="quiz-navigation">
         <button
           onClick={handlePreviousQuestion}
@@ -324,9 +343,14 @@ const QuizPage = () => {
         </button>
 
         {!showResult ? (
-          <button onClick={handleSubmitAnswer} className="btn btn-primary">
-            Submit Answer
-          </button>
+          <>
+            <button onClick={handleSeeAnswer} className="btn btn-info" style={{ background: '#06b6d4' }}>
+              👁️ See Answer
+            </button>
+            <button onClick={handleSubmitAnswer} className="btn btn-primary">
+              Submit Answer
+            </button>
+          </>
         ) : (
           <button onClick={handleNextQuestion} className="btn btn-primary">
             {currentQuestionIndex === questions.length - 1
@@ -336,9 +360,8 @@ const QuizPage = () => {
         )}
       </div>
 
-      {/* Keyboard shortcuts info */}
       <div className="quiz-tips">
-        <p>💡 Tip: Select an option and click "Submit Answer" to check your response.</p>
+        <p>💡 Tip: Click "See Answer" to peek, or "Submit Answer" to mark your response.</p>
       </div>
     </div>
   );

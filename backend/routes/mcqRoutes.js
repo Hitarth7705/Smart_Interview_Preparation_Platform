@@ -9,7 +9,7 @@ const router = express.Router();
 router.get("/all", async (req, res) => {
   try {
     const questions = await MCQQuestion.find().select(
-      "questionId category topic difficulty question options"
+      "questionId category topic difficulty question options correctAnswerIndex explanation"
     );
     res.json({
       success: true,
@@ -47,7 +47,7 @@ router.get("/category/:category", async (req, res) => {
   try {
     const { category } = req.params;
     const questions = await MCQQuestion.find({ category }).select(
-      "questionId category topic difficulty question options"
+      "questionId category topic difficulty question options correctAnswerIndex explanation"
     );
 
     res.json({
@@ -65,7 +65,7 @@ router.get("/difficulty/:difficulty", async (req, res) => {
   try {
     const { difficulty } = req.params;
     const questions = await MCQQuestion.find({ difficulty }).select(
-      "questionId category topic difficulty question options"
+      "questionId category topic difficulty question options correctAnswerIndex explanation"
     );
 
     res.json({
