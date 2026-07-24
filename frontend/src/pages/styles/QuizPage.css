@@ -18,7 +18,7 @@
 .quiz-header {
   text-align: center;
   margin-bottom: 30px;
-  color: white;
+  color: #1e293b;
 }
 
 .quiz-header h1 {
@@ -35,19 +35,19 @@
 }
 
 .stat {
-  background: rgba(255, 255, 255, 0.2);
+  background: white;
   padding: 15px 25px;
   border-radius: 10px;
-  backdrop-filter: blur(10px);
   display: flex;
   flex-direction: column;
   align-items: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .stat-label {
   font-size: 12px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(0, 0, 0, 0.8);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -56,16 +56,17 @@
   font-size: 24px;
   font-weight: bold;
   margin-top: 5px;
-  color: white;
+  color: #1e293b;
 }
 
 .stat-value.correct {
-  color: #4ade80;
+  color: #16a34a;
 }
 
 .stat-value.incorrect {
-  color: #ef4444;
+  color: #dc2626;
 }
+
 
 /* Filters */
 .quiz-filters {
@@ -119,9 +120,9 @@
 
 .progress-bar {
   height: 6px;
-  background: rgba(255, 255, 255, 0.2);
+  background: #e5e7eb;
   border-radius: 3px;
-  overflow: hidden;
+  overflow: hidden;  
   margin-bottom: 10px;
 }
 
@@ -132,11 +133,11 @@
 }
 
 .progress-text {
-  color: rgba(255, 255, 255, 0.9);
+  color: #475569;
   font-size: 14px;
+  font-weight: 600;
   margin: 0;
   text-align: center;
-  font-weight: 500;
 }
 
 /* Question Card */
@@ -434,10 +435,14 @@
 }
 
 .btn-outline {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: white;
+  color: #1e293b;
+  border: 2px solid #cbd5e1;  
   backdrop-filter: blur(10px);
+}
+.btn-outline:hover {
+  background: #f8fafc;
+  border-color: #3b82f6;
 }
 
 .btn-outline:hover:not(:disabled) {
@@ -448,14 +453,15 @@
 
 /* Tips */
 .quiz-tips {
-  background: rgba(255, 255, 255, 0.1);
+  background: white;
   padding: 15px;
   border-radius: 8px;
-  color: rgba(255, 255, 255, 0.9);
+  color: #475569;
   text-align: center;
   font-size: 14px;
   backdrop-filter: blur(10px);
   margin-top: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .quiz-tips p {
