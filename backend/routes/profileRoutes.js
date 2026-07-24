@@ -111,6 +111,7 @@ router.get("/", authMiddleware, async (req, res) => {
         name: user.name,
         email: user.email,
         createdAt: user.createdAt,
+        srsStats: user.srsStats,
       },
       questions: questions,
       dsa: dsa,

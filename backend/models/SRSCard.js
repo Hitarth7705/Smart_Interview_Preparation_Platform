@@ -9,7 +9,7 @@ const srsCardSchema = new mongoose.Schema(
     },
     questionId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Question",
+      ref: "InterviewQuestion",
       required: true
     },
     category: String,

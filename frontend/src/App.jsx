@@ -7,6 +7,8 @@ import Questions from "./pages/Questions";
 import DSA from "./pages/DSA";
 import Profile from "./pages/Profile";
 import QuizPage from "./pages/QuizPage";
+import SRSPractice from "./components/SRS/SRSPractice";
+import SRSStats from "./components/SRS/SRSStats";
 
 function App() {
   return (
@@ -21,6 +23,8 @@ function App() {
         <Route path="/dsa" element={<DSA />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/quiz" element={<QuizPage />} />
+        <Route path="/srs-practice" element={<SRSPractice />} />
+        <Route path="/srs-stats" element={<SRSStats />} />
       </Routes>
     </BrowserRouter>
   );

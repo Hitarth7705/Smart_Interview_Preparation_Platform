@@ -97,6 +97,61 @@ router.post('/submit-review', auth, async (req, res) => {
   }
 });
 
+// 2b. COMPATIBILITY ENDPOINT FOR FRONTEND (POST /review/:cardId)
+router.post('/review/:cardId', auth, async (req, res) => {
+  try {
+    const { quality, timeSpent, userAnswer } = req.body;
+    const cardId = req.params.cardId;
+    const userId = req.user.id;
+
+    // Validate quality (0-5)
+    if (quality < 0 || quality > 5) {
+      return res.status(400).json({ error: 'Quality must be 0-5' });
+    }
+
+    const srsCard = await SRSCard.findById(cardId);
+    
+    if (!srsCard || srsCard.userId.toString() !== userId) {
+      return res.status(404).json({ error: 'Card not found' });
+    }
+
+    // Calculate next review using SM-2
+    const nextReview = calculateNextReview(srsCard, quality);
+
+    // Update card
+    srsCard.easinessFactor = nextReview.easinessFactor;
+    srsCard.repetitions = nextReview.repetitions;
+    srsCard.interval = nextReview.interval;
+    srsCard.nextReviewDate = nextReview.nextReviewDate;
+    srsCard.quality = quality;
+    srsCard.lastReviewDate = new Date();
+    srsCard.status = quality < 3 ? 'learning' : 'review';
+
+    // Add review record
+    srsCard.reviews.push({
+      date: new Date(),
+      quality,
+      timeSpent: timeSpent || 0,
+      userAnswer
+    });
+
+    await srsCard.save();
+
+    // Update user stats
+    await updateUserSRSStats(userId);
+
+    res.json({
+      success: true,
+      card: srsCard,
+      nextReviewDate: nextReview.nextReviewDate,
+      message: quality < 3 ? 'Keep practicing!' : 'Great! See you in ' + nextReview.interval + ' days'
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
 // 3. GET DUE CARDS (cards ready for review today)
 router.get('/due-cards', auth, async (req, res) => {
   try {

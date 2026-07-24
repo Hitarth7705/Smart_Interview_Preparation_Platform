@@ -61,7 +61,9 @@ export default function Questions() {
     catch { return new Set(); }
   });
 
-  const markSeen = useCallback(async (questionNumber) => {
+  const markSeen = useCallback(async (question) => {
+    if (!question) return;
+    const { questionNumber, _id: questionId } = question;
     if (seenSet.has(questionNumber)) return;
     const newSet = new Set(seenSet).add(questionNumber);
     setSeenSet(newSet);
@@ -71,6 +73,14 @@ export default function Questions() {
       await fetch(`${API}/seen/${questionNumber}`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
+      });
+      await fetch(`http://localhost:5000/api/srs/create-card`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ questionId })
       });
     } catch (_) {}
   }, [seenSet]);
@@ -156,7 +166,7 @@ export default function Questions() {
   // Mark seen when card changes
   useEffect(() => {
     if (filtered.length > 0 && filtered[currentIndex]) {
-      markSeen(filtered[currentIndex].questionNumber);
+      markSeen(filtered[currentIndex]);
     }
   }, [currentIndex, filtered, markSeen]);
 

@@ -72,6 +72,12 @@ export default function Dashboard() {
               {stats ? `${stats.mcq.solved} / ${stats.mcq.total}` : "—"}
             </p>
           </div>
+          <div style={styles.card}>
+            <h3 style={styles.cardTitle}>SRS Cards</h3>
+            <p style={{ ...styles.cardValue, color: "#8b5cf6" }}>
+              {user?.srsStats ? `${user.srsStats.totalCards}` : "—"}
+            </p>
+          </div>
         </div>
 
         {/* Interview Questions */}
@@ -105,6 +111,22 @@ export default function Dashboard() {
           <Link to="/quiz" style={styles.linkBtn("#0ea5e9", "#06b6d4")}>
             Start MCQ Quiz →
           </Link>
+        </div>
+
+        {/* Spaced Repetition System */}
+        <div style={styles.section}>
+          <h3 style={{ margin: "0 0 8px" }}>🔁 Spaced Repetition System (SRS)</h3>
+          <p style={{ margin: "0 0 16px", color: "#555", fontSize: 14 }}>
+            Intelligently review interview questions scheduled by the SuperMemo SM-2 algorithm. Rate recall quality (0-5) to optimize long-term memory retention.
+          </p>
+          <div style={{ display: "flex", gap: "10px" }}>
+            <Link to="/srs-practice" style={styles.linkBtn("#667eea", "#764ba2")}>
+              Practice Due Cards →
+            </Link>
+            <Link to="/srs-stats" style={styles.linkBtn("#9f7aea", "#b794f4")}>
+              View SRS Stats →
+            </Link>
+          </div>
         </div>
 
         {/* Profile shortcut */}

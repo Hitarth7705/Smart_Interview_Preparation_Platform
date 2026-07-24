@@ -18,6 +18,8 @@ export default function Navbar() {
         <Link to="/questions" style={styles.link}>Questions</Link>
         <Link to="/dsa" style={styles.link}>DSA</Link>
         <Link to="/quiz" style={styles.link}>Quiz</Link>
+        <Link to="/srs-practice" style={styles.link}>SRS Practice</Link>
+        <Link to="/srs-stats" style={styles.link}>SRS Stats</Link>
         <Link to="/profile" style={styles.link}>Profile</Link>
 
         <button style={styles.logoutBtn} onClick={handleLogout}>
