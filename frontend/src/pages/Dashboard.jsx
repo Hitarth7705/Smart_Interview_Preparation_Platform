@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import Navbar from "../components/Navbar";
 
 const API = "http://localhost:5000/api/profile";
 
@@ -30,26 +31,21 @@ export default function Dashboard() {
       .catch(() => {});
   }, [navigate]);
 
-  const handleLogout = () => {
+ /*  const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     navigate("/login");
-  };
+  }; */
 
   return (
     <div style={styles.page}>
-      {/* Navbar */}
-      <div style={styles.navbar}>
-        <h2 style={{ margin: 0 }}>Smart Interview Prep</h2>
-        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-          <Link to="/profile" style={styles.profileBtn}>👤 Profile</Link>
-          <button style={styles.logoutBtn} onClick={handleLogout}>Logout</button>
-        </div>
-      </div>
-
+    <Navbar />
       <div style={styles.container}>
-        <h2>Welcome{user ? `, ${user.name}` : ""} 🎉</h2>
+  <h2 className="page-title">Dashboard</h2>
 
+  <h2>
+    Welcome{user ? `, ${user.name}` : ""} 🎉
+  </h2>
         {/* Stats Cards */}
         <div style={styles.cards}>
           <div style={styles.card}>

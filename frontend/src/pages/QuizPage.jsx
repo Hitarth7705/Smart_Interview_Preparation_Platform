@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './styles/QuizPage.css';
+import Navbar from "../components/Navbar";
 
 const QuizPage = () => {
   const [questions, setQuestions] = useState([]);
@@ -190,9 +191,12 @@ const QuizPage = () => {
   const isDone = doneQuestions.has(currentQuestionIndex);
 
   return (
+    <>
+      <Navbar />
+
     <div className="quiz-container">
       <div className="quiz-header">
-        <h1>MCQ Quiz</h1>
+        <h2 className="page-title">MCQ Quiz</h2>
         <div className="quiz-stats">
           <div className="stat">
             <span className="stat-label">Correct</span>
@@ -364,6 +368,7 @@ const QuizPage = () => {
         <p>💡 Tip: Click "See Answer" to peek, or "Submit Answer" to mark your response.</p>
       </div>
     </div>
+    </>
   );
 };
 

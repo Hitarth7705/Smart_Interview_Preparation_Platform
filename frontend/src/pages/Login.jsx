@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 
+
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -33,7 +34,7 @@ export default function Login() {
   return (
     <div style={styles.body}>
       <div style={styles.card}>
-        <h2 style={styles.title}>Login</h2>
+        <h2 className="page-title">Login</h2>
         <form onSubmit={handleLogin}>
           <input
             style={styles.input}

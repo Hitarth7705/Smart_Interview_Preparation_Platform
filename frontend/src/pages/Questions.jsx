@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
-import { useNavigate, Link } from "react-router-dom";
-
+//import { useNavigate, Link } from "react-router-dom";
+import Navbar from "../components/Navbar";
+import { useNavigate } from "react-router-dom";
 const API = "http://localhost:5000/api/questions";
 
 const CATEGORIES = [
@@ -169,10 +170,10 @@ export default function Questions() {
   const prev = () => { if (currentIndex > 0) goTo(currentIndex - 1); };
   const next = () => { if (currentIndex < filtered.length - 1) goTo(currentIndex + 1); };
 
-  const handleLogout = () => {
+  /* const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/login");
-  };
+  }; */
 
   // ── Current question ──────────────────────────────────────────
   const q = filtered[currentIndex];
@@ -181,24 +182,12 @@ export default function Questions() {
   // ── Render ────────────────────────────────────────────────────
   return (
     <div style={s.page}>
-      {/* ── Navbar ────────────────────────────────────────────── */}
-      <nav style={s.navbar}>
-        <div style={s.navLeft}>
-          <span style={s.navLogo}>⚡ Smart Interview Prep</span>
-          <Link to="/dashboard" style={s.navLink}>Dashboard</Link>
-          <Link to="/dsa"       style={s.navLink}>DSA</Link>
-          <Link to="/profile"   style={s.navLink}>Profile</Link>
-          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-          <span style={{ color: "#94a3b8", fontSize: 13 }}>👁️ {seenSet.size} seen</span>
-          <button style={s.logoutBtn} onClick={handleLogout}>Logout</button>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       <div style={s.wrapper}>
         {/* ── Page title ──────────────────────────────────────── */}
         <div style={s.pageHeader}>
-          <h1 style={s.pageTitle}>Interview Questions</h1>
+          <h2 className="page-title">Interview Questions</h2>
           <p style={s.pageSubtitle}>
             {loading ? "Loading…" : `${filtered.length} questions`}
           </p>

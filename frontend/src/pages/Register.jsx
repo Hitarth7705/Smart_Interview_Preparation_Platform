@@ -34,7 +34,7 @@ export default function Register() {
   return (
     <div style={styles.body}>
       <div style={styles.card}>
-        <h2 style={styles.title}>Register</h2>
+        <h2 className="page-title">Create Account</h2>
         <form onSubmit={handleRegister}>
           <input
             style={styles.input}
@@ -89,6 +89,7 @@ const styles = {
     textAlign: "center",
     boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
   },
+  
   title: { marginBottom: "20px", color: "#333" },
   input: {
     width: "100%",

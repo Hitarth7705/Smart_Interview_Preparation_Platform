@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
-
+//import { useNavigate, Link } from "react-router-dom";
+import Navbar from "../components/Navbar";
+import { useNavigate } from "react-router-dom";
 const API = "http://localhost:5000/api/profile";
 
 const CATEGORY_COLORS = {
@@ -89,17 +90,8 @@ export default function Profile() {
 
   return (
     <div style={styles.page}>
-      {/* Navbar */}
-      <div style={styles.navbar}>
-        <h2 style={{ margin: 0 }}>👤 My Profile</h2>
-        <div style={{ display: "flex", gap: 10 }}>
-          <Link to="/dashboard" style={styles.navLink}>Dashboard</Link>
-          <Link to="/questions" style={styles.navLink}>Questions</Link>
-          <Link to="/dsa"       style={styles.navLink}>DSA</Link>
-          <Link to="/quiz"      style={styles.navLink}>MCQ</Link>
-        </div>
-      </div>
-
+      <Navbar />
+    <h2 className="page-title">My Profile</h2>
       <div style={styles.container}>
         {/* User Info Card */}
         <div style={styles.card}>
