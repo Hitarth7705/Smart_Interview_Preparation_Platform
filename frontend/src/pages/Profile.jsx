@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-//import { useNavigate, Link } from "react-router-dom";
-import Navbar from "../components/Navbar";
 import { useNavigate } from "react-router-dom";
-const API = "http://localhost:5000/api/profile";
+import Navbar from "../components/Navbar";
+import API_BASE from "../config";
+
+const API = `${API_BASE}/api/profile`;
 
 const CATEGORY_COLORS = {
   JavaScript: "#f7df1e", React: "#61dafb", "Node.js": "#68a063",

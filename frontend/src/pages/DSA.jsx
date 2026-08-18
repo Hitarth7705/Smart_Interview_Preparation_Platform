@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
-//import { useNavigate, Link } from "react-router-dom";
-import Navbar from "../components/Navbar";
 import { useNavigate } from "react-router-dom";
-const API_DSA = "http://localhost:5000/api/dsa";
+import Navbar from "../components/Navbar";
+import API_BASE from "../config";
+
+const API_DSA = `${API_BASE}/api/dsa`;
 
 const TOPICS = [
   "All",
@@ -90,7 +91,7 @@ export default function DSA() {
     // Load user progress from profile
     const loadProgress = async () => {
       try {
-        const res  = await fetch("http://localhost:5000/api/profile", {
+        const res  = await fetch(`${API_BASE}/api/profile`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();

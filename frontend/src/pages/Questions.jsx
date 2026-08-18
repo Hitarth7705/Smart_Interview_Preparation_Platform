@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
-//import { useNavigate, Link } from "react-router-dom";
-import Navbar from "../components/Navbar";
 import { useNavigate } from "react-router-dom";
-const API = "http://localhost:5000/api/questions";
+import Navbar from "../components/Navbar";
+import API_BASE from "../config";
+
+const API = `${API_BASE}/api/questions`;
 
 const CATEGORIES = [
   "All",
@@ -74,7 +75,7 @@ export default function Questions() {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
       });
-      await fetch(`http://localhost:5000/api/srs/create-card`, {
+      await fetch(`${API_BASE}/api/srs/create-card`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

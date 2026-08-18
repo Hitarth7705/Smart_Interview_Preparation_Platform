@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './styles/QuizPage.css';
 import Navbar from "../components/Navbar";
+import API_BASE from "../config";
 
 const QuizPage = () => {
   const [questions, setQuestions] = useState([]);
@@ -23,7 +24,7 @@ const QuizPage = () => {
   // Fetch categories on mount
   useEffect(() => {
     console.log('📡 Fetching categories...');
-    fetch('/api/mcq/meta/categories')
+    fetch(`${API_BASE}/api/mcq/meta/categories`)
       .then((res) => res.json())
       .then((data) => {
         console.log('✅ Categories loaded:', data);
@@ -41,9 +42,9 @@ const QuizPage = () => {
     console.log(`📡 Fetching questions for category: ${category}, difficulty: ${difficulty}`);
     setLoading(true);
 
-    let endpoint = '/api/mcq/all';
-    if (category !== 'All') endpoint = `/api/mcq/category/${category}`;
-    if (difficulty !== 'All') endpoint = `/api/mcq/difficulty/${difficulty}`;
+    let endpoint = `${API_BASE}/api/mcq/all`;
+    if (category !== 'All') endpoint = `${API_BASE}/api/mcq/category/${category}`;
+    if (difficulty !== 'All') endpoint = `${API_BASE}/api/mcq/difficulty/${difficulty}`;
 
     fetch(endpoint)
       .then((res) => res.json())
@@ -95,7 +96,7 @@ const QuizPage = () => {
       const questionId = questions[currentQuestionIndex].questionId;
       const token = localStorage.getItem('token');
       
-      const response = await fetch(`/api/mcq/submit-answer/${questionId}`, {
+      const response = await fetch(`${API_BASE}/api/mcq/submit-answer/${questionId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

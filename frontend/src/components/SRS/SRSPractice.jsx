@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../Navbar';
 import './SRSPractice.css';
+import API_BASE from '../../config';
 
 function SRSPractice() {
   const [cards, setCards] = useState([]);
@@ -17,7 +18,7 @@ function SRSPractice() {
   const fetchDueCards = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/srs/due-cards', {
+      const response = await fetch(`${API_BASE}/api/srs/due-cards`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await response.json();
@@ -44,7 +45,7 @@ function SRSPractice() {
     if (!currentCard) return;
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/srs/review/${currentCard._id}`, {
+      const response = await fetch(`${API_BASE}/api/srs/review/${currentCard._id}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import API_BASE from "../config";
 
 // STEP 1: Enter Email
 function StepEmail({ onNext }) {
@@ -10,8 +11,8 @@ function StepEmail({ onNext }) {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/auth/forgot-password", {
-        method: "POST",
+      const res = await fetch(`${API_BASE}/api/auth/forgot-password`, {
+        method: "POST",                                                                                                                                                                                                                                                                                                                                  
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
@@ -23,9 +24,7 @@ function StepEmail({ onNext }) {
         alert(data.message || "Email not found.");
       }
     } catch {
-      // For demo purposes, allow moving to next step even without backend
-      alert("OTP sent! (Demo: use OTP 123456)");
-      onNext(email);
+      alert("Could not connect to server. Please check your connection and try again.");
     } finally {
       setLoading(false);
     }
@@ -61,7 +60,7 @@ function StepOTP({ email, onNext }) {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/auth/verify-otp", {
+      const res = await fetch(`${API_BASE}/api/auth/verify-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, otp }),
@@ -73,12 +72,7 @@ function StepOTP({ email, onNext }) {
         alert(data.message || "Invalid OTP.");
       }
     } catch {
-      // Demo: accept any OTP
-      if (otp.length >= 4) {
-        onNext(otp);
-      } else {
-        alert("Please enter a valid OTP.");
-      }
+      alert("Could not connect to server. Please check your connection and try again.");
     } finally {
       setLoading(false);
     }
@@ -120,7 +114,7 @@ function StepNewPassword({ email, otp, onDone }) {
     }
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/auth/reset-password", {
+      const res = await fetch(`${API_BASE}/api/auth/reset-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, otp, newPassword: password }),
@@ -133,9 +127,7 @@ function StepNewPassword({ email, otp, onDone }) {
         alert(data.message || "Reset failed.");
       }
     } catch {
-      // Demo success
-      alert("Password reset successfully! (Demo mode)");
-      onDone();
+      alert("Could not connect to server. Please check your connection and try again.");
     } finally {
       setLoading(false);
     }

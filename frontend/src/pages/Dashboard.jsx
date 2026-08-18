@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import API_BASE from "../config";
 
-const API = "http://localhost:5000/api/profile";
+const API = `${API_BASE}/api/profile`;
 
 export default function Dashboard() {
   const navigate = useNavigate();

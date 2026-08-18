@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../Navbar';
 import './SRSPractice.css';
+import API_BASE from '../../config';
 
 function SRSStats() {
   const [stats, setStats] = useState(null);
@@ -14,7 +15,7 @@ function SRSStats() {
   const fetchStats = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/srs/stats', {
+      const response = await fetch(`${API_BASE}/api/srs/stats`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await response.json();

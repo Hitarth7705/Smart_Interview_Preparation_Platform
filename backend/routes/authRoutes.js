@@ -2,11 +2,10 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const OtpToken = require("../models/OtpToken");
+const { sendOTPEmail } = require("../utils/mailer");
 
 const router = express.Router();
-
-// In-memory OTP store (use Redis or DB in production)
-const otpStore = {}; // { email: { otp, expiresAt } }
 
 // ── REGISTER ──────────────────────────────────────────────
 router.post("/register", async (req, res) => {
@@ -67,17 +66,18 @@ router.post("/forgot-password", async (req, res) => {
 
     // Generate 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
 
-    otpStore[email] = { otp, expiresAt };
+    // Delete any existing OTP for this email, then save fresh one
+    await OtpToken.deleteMany({ email });
+    await OtpToken.create({ email, otp });
 
-    // In production, send OTP via email (nodemailer, SendGrid, etc.)
-    // For now, we log it to console (replace with actual email sending)
-    console.log(`\n🔑 OTP for ${email}: ${otp} (valid 10 min)\n`);
+    // Send OTP via email
+    await sendOTPEmail(email, otp);
 
     res.json({ message: "OTP sent to your email" });
   } catch (err) {
-    res.status(500).json({ message: "Server error", error: err.message });
+    console.error("Forgot password error:", err.message);
+    res.status(500).json({ message: "Failed to send OTP. Please try again.", error: err.message });
   }
 });
 
@@ -87,12 +87,8 @@ router.post("/verify-otp", async (req, res) => {
     const { email, otp } = req.body;
     if (!email || !otp) return res.status(400).json({ message: "Email and OTP are required" });
 
-    const record = otpStore[email];
-    if (!record) return res.status(400).json({ message: "No OTP requested for this email" });
-    if (Date.now() > record.expiresAt) {
-      delete otpStore[email];
-      return res.status(400).json({ message: "OTP has expired. Please request a new one." });
-    }
+    const record = await OtpToken.findOne({ email });
+    if (!record) return res.status(400).json({ message: "OTP has expired or was never requested. Please request a new one." });
     if (record.otp !== otp) return res.status(400).json({ message: "Invalid OTP" });
 
     res.json({ message: "OTP verified successfully" });
@@ -108,18 +104,15 @@ router.post("/reset-password", async (req, res) => {
     if (!email || !otp || !newPassword)
       return res.status(400).json({ message: "All fields are required" });
 
-    const record = otpStore[email];
-    if (!record) return res.status(400).json({ message: "No OTP requested for this email" });
-    if (Date.now() > record.expiresAt) {
-      delete otpStore[email];
-      return res.status(400).json({ message: "OTP has expired. Please try again." });
-    }
+    const record = await OtpToken.findOne({ email });
+    if (!record) return res.status(400).json({ message: "OTP has expired. Please request a new one." });
     if (record.otp !== otp) return res.status(400).json({ message: "Invalid OTP" });
 
     const hashed = await bcrypt.hash(newPassword, 10);
     await User.findOneAndUpdate({ email }, { password: hashed });
 
-    delete otpStore[email]; // Clean up used OTP
+    // Delete OTP after successful use
+    await OtpToken.deleteMany({ email });
 
     res.json({ message: "Password reset successfully" });
   } catch (err) {
