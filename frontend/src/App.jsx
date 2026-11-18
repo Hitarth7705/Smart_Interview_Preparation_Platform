@@ -9,7 +9,7 @@ import Profile from "./pages/Profile";
 import QuizPage from "./pages/QuizPage";
 import SRSPractice from "./components/SRS/SRSPractice";
 import SRSStats from "./components/SRS/SRSStats";
-
+import CodingPractice from "./pages/CodingPractice";
 function App() {
   return (
     <BrowserRouter>
@@ -25,6 +25,7 @@ function App() {
         <Route path="/quiz" element={<QuizPage />} />
         <Route path="/srs-practice" element={<SRSPractice />} />
         <Route path="/srs-stats" element={<SRSStats />} />
+        <Route path="/coding" element={<CodingPractice />} />
       </Routes>
     </BrowserRouter>
   );

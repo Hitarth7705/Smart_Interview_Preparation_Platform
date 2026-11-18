@@ -5,7 +5,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const connectDB = require("./config/db");
-
+const codingRoutes = require("./routes/codingRoutes");
 // Import all route files
 const authRoutes = require("./routes/authRoutes");
 const questionRoutes = require("./routes/questionRoutes");
@@ -27,7 +27,7 @@ app.use("/api/dsa", dsaRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/mcq", mcqRoutes);
 app.use("/api/srs", srsRoutes);
-
+app.use("/api/coding", codingRoutes);
 app.get("/", (req, res) => {
   res.send("API Running...");
 });
