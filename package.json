@@ -7,7 +7,8 @@
     "start": "node backend/server.js",
     "install:all": "npm install --prefix backend && npm install --prefix frontend",
     "server": "npm start --prefix backend",
-    "client": "npm start --prefix frontend"
+    "client": "npm start --prefix frontend",
+    "seed": "npm run seed:all --prefix backend"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
