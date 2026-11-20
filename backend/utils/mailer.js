@@ -2,9 +2,6 @@ const nodemailer = require("nodemailer");
 const { google } = require("googleapis");
 const EmailConfig = require("../models/EmailConfig");
 const { decrypt } = require("./encryption");
-const nodemailer = require("nodemailer");
-const EmailConfig = require("../models/EmailConfig");
-const { decrypt } = require("./encryption");
 
 const APP_NAME = process.env.MAIL_FROM_NAME || "Smart Interview Prep";
 const SUBJECT = "Your Password Reset OTP";
