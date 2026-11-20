@@ -1,4 +1,8 @@
 const nodemailer = require("nodemailer");
+const { google } = require("googleapis");
+const EmailConfig = require("../models/EmailConfig");
+const { decrypt } = require("./encryption");
+const nodemailer = require("nodemailer");
 const EmailConfig = require("../models/EmailConfig");
 const { decrypt } = require("./encryption");
 
@@ -116,6 +120,71 @@ const sendViaResend = async (toEmail, html) => {
   return data;
 };
 
+// Provider 3: Gmail API (HTTPS - works on Render Free)
+const sendViaGmailApi = async (toEmail, html) => {
+  const {
+    GOOGLE_CLIENT_ID,
+    GOOGLE_CLIENT_SECRET,
+    GOOGLE_REFRESH_TOKEN,
+    GMAIL_SENDER_EMAIL,
+  } = process.env;
+
+  if (
+    !GOOGLE_CLIENT_ID ||
+    !GOOGLE_CLIENT_SECRET ||
+    !GOOGLE_REFRESH_TOKEN ||
+    !GMAIL_SENDER_EMAIL
+  ) {
+    throw new Error("Gmail API credentials are missing.");
+  }
+
+  const oauth2Client = new google.auth.OAuth2(
+    GOOGLE_CLIENT_ID,
+    GOOGLE_CLIENT_SECRET
+  );
+
+  oauth2Client.setCredentials({
+    refresh_token: GOOGLE_REFRESH_TOKEN,
+  });
+
+  const gmail = google.gmail({
+    version: "v1",
+    auth: oauth2Client,
+  });
+
+  // Encode the subject and display name for email headers
+  const encodeHeader = (value) =>
+    `=?UTF-8?B?${Buffer.from(value, "utf8").toString("base64")}?=`;
+
+  const message = [
+    `From: ${encodeHeader(APP_NAME)} <${GMAIL_SENDER_EMAIL}>`,
+    `To: ${toEmail}`,
+    `Subject: ${encodeHeader(SUBJECT)}`,
+    "MIME-Version: 1.0",
+    'Content-Type: text/html; charset="UTF-8"',
+    "Content-Transfer-Encoding: base64",
+    "",
+    Buffer.from(html, "utf8").toString("base64"),
+  ].join("\r\n");
+
+  const encodedMessage = Buffer.from(message)
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+
+  const response = await gmail.users.messages.send({
+    userId: "me",
+    requestBody: {
+      raw: encodedMessage,
+    },
+  });
+
+  console.log("OTP email sent via Gmail API:", response.data.id);
+
+  return response.data;
+};
+
 // ── Provider 3: Gmail SMTP (local development only; blocked on Render free) ──
 const sendViaGmailSmtp = async (toEmail, html) => {
   try {
@@ -178,11 +247,44 @@ const sendViaGmailSmtp = async (toEmail, html) => {
 
 // Uses the first provider that has credentials. A configured provider that
 // fails throws, so the route can report it instead of silently switching.
-const sendOTPEmail = async (toEmail, otp) => {
+/* const sendOTPEmail = async (toEmail, otp) => {
   const html = getHtmlTemplate(otp);
 
   if (process.env.BREVO_API_KEY) return sendViaBrevo(toEmail, html);
   if (process.env.RESEND_API_KEY) return sendViaResend(toEmail, html);
+  return sendViaGmailSmtp(toEmail, html);
+}; */
+
+const sendOTPEmail = async (toEmail, otp) => {
+  const html = getHtmlTemplate(otp);
+
+  // Priority 1: Gmail API (works on Render Free)
+  if (
+    process.env.GOOGLE_CLIENT_ID &&
+    process.env.GOOGLE_CLIENT_SECRET &&
+    process.env.GOOGLE_REFRESH_TOKEN &&
+    process.env.GMAIL_SENDER_EMAIL
+  ) {
+    return sendViaGmailApi(toEmail, html);
+  }
+
+  // Priority 2: Brevo
+  if (process.env.BREVO_API_KEY) {
+    return sendViaBrevo(toEmail, html);
+  }
+
+  // Priority 3: Resend
+  if (process.env.RESEND_API_KEY) {
+    return sendViaResend(toEmail, html);
+  }
+
+  // Local development only
+  if (process.env.NODE_ENV === "production") {
+    throw new Error(
+      "No HTTPS email provider configured for production."
+    );
+  }
+
   return sendViaGmailSmtp(toEmail, html);
 };
 
