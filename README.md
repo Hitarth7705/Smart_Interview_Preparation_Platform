@@ -12,7 +12,7 @@ A full-stack, enterprise-grade learning and interview preparation platform built
 | **Backend REST API** | **Render** | `https://smart-interview-backend.onrender.com` (Health check: `/api/health`) |
 | **Database** | **MongoDB Atlas** | Hosted M0 Cloud Cluster (AWS) |
 | **Code Execution Engine** | **Judge0 CE** | `https://ce.judge0.com` (C, C++, Java, Python runtime) |
-| **Email Service** | **Gmail SMTP / Nodemailer** | 6-digit OTP verification service for password recovery |
+| **Email Service** | **Brevo HTTPS API** (Gmail SMTP for local dev) | 6-digit OTP verification service for password recovery |
 
 ---
 
@@ -86,7 +86,7 @@ A full-stack, enterprise-grade learning and interview preparation platform built
 
 ### 🔐 7. Security & Authentication
 - **JWT & Password Hashing**: JSON Web Tokens with HTTP authorization headers and salted bcryptjs password encryption.
-- **OTP Password Recovery**: Secure 6-digit OTP delivery via Nodemailer with 10-minute expiration and token invalidation.
+- **OTP Password Recovery**: Secure 6-digit OTP delivery by email (Brevo API) with 10-minute expiration, hashed storage, a 5-attempt limit and a 60-second resend cooldown.
 
 ---
 
@@ -127,7 +127,7 @@ Smart_Interview_Preparation_Platform/
 │   │   └── judge0Service.js              # Judge0 CE submission & polling service
 │   ├── utils/
 │   │   ├── encryption.js                 # AES-256-GCM credential encryption
-│   │   ├── mailer.js                     # Nodemailer SMTP & OTP dispatch
+│   │   ├── mailer.js                     # OTP email dispatch (Brevo / Resend / Gmail SMTP)
 │   │   └── srsAlgorithm.js               # SuperMemo SM-2 algorithm calculation
 │   ├── seedCodingQuestions.js            # Coding challenges database seeder
 │   ├── seedDSA.js                        # DSA problems database seeder
@@ -236,9 +236,14 @@ JWT_SECRET=my_super_secret_jwt_key_12345
 # Server Port
 PORT=5000
 
-# Gmail Credentials for Password Reset OTPs
-MAIL_USER=your_email@gmail.com
-MAIL_PASS=your_16_digit_gmail_app_password
+# Password Reset OTP email (free Brevo account, works on Render free tier)
+BREVO_API_KEY=your_brevo_api_key
+BREVO_SENDER_EMAIL=the_sender_address_you_verified_in_brevo
+MAIL_FROM_NAME=Smart Interview Prep
+
+# Local development only (SMTP is blocked on Render free tier)
+# MAIL_USER=your_email@gmail.com
+# MAIL_PASS=your_16_digit_gmail_app_password
 
 # Code Execution API (Optional - defaults to public Judge0 CE)
 JUDGE0_URL=https://ce.judge0.com
@@ -312,8 +317,12 @@ npm run client
 | `MONGO_URI` | Backend | **Yes** | MongoDB Atlas connection string |
 | `JWT_SECRET` | Backend | **Yes** | Secret key for signing and validating JWTs |
 | `PORT` | Backend | No | Port for Express server (Defaults to `5000`) |
-| `MAIL_USER` | Backend | Optional | Gmail address for sending OTP emails |
-| `MAIL_PASS` | Backend | Optional | 16-character Gmail App Password |
+| `BREVO_API_KEY` | Backend | **Yes** (Prod) | Brevo API key used to send password-reset OTP emails |
+| `BREVO_SENDER_EMAIL` | Backend | **Yes** (Prod) | Sender address verified in Brevo |
+| `MAIL_FROM_NAME` | Backend | No | Display name on OTP emails (Defaults to `Smart Interview Prep`) |
+| `RESEND_API_KEY` / `RESEND_FROM` | Backend | Optional | Alternative to Brevo; needs your own verified domain to reach other users |
+| `MAIL_USER` | Backend | Optional | Gmail address for local-development OTP emails (SMTP is blocked on Render free) |
+| `MAIL_PASS` | Backend | Optional | 16-character Gmail App Password (local development only) |
 | `JUDGE0_URL` | Backend | No | Judge0 instance URL (Defaults to `https://ce.judge0.com`) |
 | `EMAIL_ENCRYPTION_KEY` | Backend | Optional | 64-hex key for database-stored credentials |
 | `REACT_APP_API_URL` | Frontend | **Yes** (Prod) | URL of the backend API (e.g. `https://smart-interview-backend.onrender.com`) |
@@ -330,7 +339,7 @@ For full instructions on configuring Vercel, Render, and MongoDB Atlas, refer to
    - Root directory: `backend`
    - Build command: `npm install`
    - Start command: `npm start`
-   - Set environment variables: `MONGO_URI`, `JWT_SECRET`, `MAIL_USER`, `MAIL_PASS`, `EMAIL_ENCRYPTION_KEY`.
+   - Set environment variables: `MONGO_URI`, `JWT_SECRET`, `BREVO_API_KEY`, `BREVO_SENDER_EMAIL`.
 3. **Frontend (Vercel)**:
    - Root directory: `frontend`
    - Framework preset: `Create React App`
@@ -340,9 +349,8 @@ For full instructions on configuring Vercel, Render, and MongoDB Atlas, refer to
 
 ## 👤 Authors & Contributors
 
-- **Aayushi Shah** - Lead Developer & Architecture
-- **Hitarth Purani** - Coding Practice Engine & Platform Features
-
+- **Aayushi Shah** 
+- **Hitarth Purani** 
 ---
 
 ## 🙏 Acknowledgments

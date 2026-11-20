@@ -1,3 +1,4 @@
+const crypto = require("crypto");
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -6,6 +7,57 @@ const OtpToken = require("../models/OtpToken");
 const { sendOTPEmail } = require("../utils/mailer");
 
 const router = express.Router();
+
+// ── OTP helpers ───────────────────────────────────────────
+const MAX_OTP_ATTEMPTS = 5; // guesses allowed per OTP
+const RESEND_COOLDOWN_MS = 60 * 1000; // protects the free email quota
+
+const generateOtp = () => crypto.randomInt(100000, 1000000).toString();
+
+const hashOtp = (email, otp) =>
+  crypto
+    .createHmac("sha256", process.env.JWT_SECRET)
+    .update(`${email}:${otp}`)
+    .digest("hex");
+
+const safeEqual = (a, b) => {
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  return bufA.length === bufB.length && crypto.timingSafeEqual(bufA, bufB);
+};
+
+// Counts the attempt atomically, then checks the OTP.
+// Returns { ok: true } or { ok: false, status, message }.
+const checkOtp = async (email, otp) => {
+  const record = await OtpToken.findOneAndUpdate(
+    { email },
+    { $inc: { attempts: 1 } },
+    { new: true }
+  );
+
+  if (!record) {
+    return {
+      ok: false,
+      status: 400,
+      message: "OTP has expired or was never requested. Please request a new one.",
+    };
+  }
+
+  if (record.attempts > MAX_OTP_ATTEMPTS) {
+    await OtpToken.deleteMany({ email });
+    return {
+      ok: false,
+      status: 429,
+      message: "Too many incorrect attempts. Please request a new OTP.",
+    };
+  }
+
+  if (!safeEqual(record.otpHash, hashOtp(email, String(otp).trim()))) {
+    return { ok: false, status: 400, message: "Invalid OTP" };
+  }
+
+  return { ok: true };
+};
 
 // ── REGISTER ──────────────────────────────────────────────
 router.post("/register", async (req, res) => {
@@ -59,25 +111,41 @@ router.post("/login", async (req, res) => {
 router.post("/forgot-password", async (req, res) => {
   try {
     const { email } = req.body;
-    if (!email) return res.status(400).json({ message: "Email is required" });
+    if (!email || typeof email !== "string")
+      return res.status(400).json({ message: "Email is required" });
 
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ message: "No account found with this email" });
 
-    // Generate 6-digit OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    // Block rapid re-requests so the free email quota can't be burned
+    const existing = await OtpToken.findOne({ email });
+    if (existing) {
+      const waitMs = RESEND_COOLDOWN_MS - (Date.now() - existing.createdAt.getTime());
+      if (waitMs > 0) {
+        return res.status(429).json({
+          message: `Please wait ${Math.ceil(waitMs / 1000)}s before requesting another OTP.`,
+        });
+      }
+    }
 
-    // Delete any existing OTP for this email, then save fresh one
+    // Generate 6-digit OTP (cryptographically secure) and store only its hash
+    const otp = generateOtp();
     await OtpToken.deleteMany({ email });
-    await OtpToken.create({ email, otp });
+    await OtpToken.create({ email, otpHash: hashOtp(email, otp) });
 
-    // Send OTP via email
-    await sendOTPEmail(email, otp);
+    try {
+      await sendOTPEmail(email, otp);
+    } catch (mailErr) {
+      // Sending failed: drop the OTP so the user can retry immediately
+      await OtpToken.deleteMany({ email });
+      throw mailErr;
+    }
 
     res.json({ message: "OTP sent to your email" });
   } catch (err) {
+    // Provider details stay in the server log, not in the response
     console.error("Forgot password error:", err.message);
-    res.status(500).json({ message: "Failed to send OTP. Please try again.", error: err.message });
+    res.status(500).json({ message: "Failed to send OTP. Please try again." });
   }
 });
 
@@ -85,11 +153,11 @@ router.post("/forgot-password", async (req, res) => {
 router.post("/verify-otp", async (req, res) => {
   try {
     const { email, otp } = req.body;
-    if (!email || !otp) return res.status(400).json({ message: "Email and OTP are required" });
+    if (!email || !otp || typeof email !== "string")
+      return res.status(400).json({ message: "Email and OTP are required" });
 
-    const record = await OtpToken.findOne({ email });
-    if (!record) return res.status(400).json({ message: "OTP has expired or was never requested. Please request a new one." });
-    if (record.otp !== otp) return res.status(400).json({ message: "Invalid OTP" });
+    const result = await checkOtp(email, otp);
+    if (!result.ok) return res.status(result.status).json({ message: result.message });
 
     res.json({ message: "OTP verified successfully" });
   } catch (err) {
@@ -101,12 +169,13 @@ router.post("/verify-otp", async (req, res) => {
 router.post("/reset-password", async (req, res) => {
   try {
     const { email, otp, newPassword } = req.body;
-    if (!email || !otp || !newPassword)
+    if (!email || !otp || !newPassword || typeof email !== "string" || typeof newPassword !== "string")
       return res.status(400).json({ message: "All fields are required" });
+    if (newPassword.length < 6)
+      return res.status(400).json({ message: "Password must be at least 6 characters" });
 
-    const record = await OtpToken.findOne({ email });
-    if (!record) return res.status(400).json({ message: "OTP has expired. Please request a new one." });
-    if (record.otp !== otp) return res.status(400).json({ message: "Invalid OTP" });
+    const result = await checkOtp(email, otp);
+    if (!result.ok) return res.status(result.status).json({ message: result.message });
 
     const hashed = await bcrypt.hash(newPassword, 10);
     await User.findOneAndUpdate({ email }, { password: hashed });

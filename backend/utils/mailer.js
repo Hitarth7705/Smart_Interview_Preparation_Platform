@@ -2,6 +2,9 @@ const nodemailer = require("nodemailer");
 const EmailConfig = require("../models/EmailConfig");
 const { decrypt } = require("./encryption");
 
+const APP_NAME = process.env.MAIL_FROM_NAME || "Smart Interview Prep";
+const SUBJECT = "Your Password Reset OTP";
+
 const getHtmlTemplate = (otp) => `
   <div style="
     font-family: Arial, sans-serif;
@@ -34,70 +37,87 @@ const getHtmlTemplate = (otp) => `
   </div>
 `;
 
-const sendOTPEmail = async (toEmail, otp) => {
-  const html = getHtmlTemplate(otp);
+// POST JSON over HTTPS (port 443) with a timeout. Works on Render's free tier,
+// which blocks SMTP ports. Throws an Error carrying the provider's message.
+const postJson = async (url, headers, body) => {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      ...headers,
+    },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(15000),
+  });
 
-  // 1. Resend HTTP API (Port 443 HTTPS - works 100% on Render Free Tier)
-  if (process.env.RESEND_API_KEY) {
-    try {
-      const fromEmail = process.env.RESEND_FROM || "onboarding@resend.dev";
-      const response = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${process.env.RESEND_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          from: `Smart Interview Prep <${fromEmail}>`,
-          to: [toEmail],
-          subject: "Your Password Reset OTP",
-          html,
-        }),
-      });
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || JSON.stringify(data));
-      }
-      console.log("OTP email sent successfully via Resend API:", data.id);
-      return data;
-    } catch (apiErr) {
-      console.error("Resend API error:", apiErr.message);
-      throw apiErr;
-    }
+  const text = await response.text();
+  let data;
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch {
+    data = { raw: text };
   }
 
-  // 2. SendGrid HTTP API (Port 443 HTTPS)
-  if (process.env.SENDGRID_API_KEY) {
-    try {
-      const fromEmail = process.env.SENDGRID_FROM_EMAIL || process.env.MAIL_USER || "noreply@smartinterviewprep.com";
-      const response = await fetch("https://api.sendgrid.com/v3/mail/send", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${process.env.SENDGRID_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          personalizations: [{ to: [{ email: toEmail }] }],
-          from: { email: fromEmail, name: "Smart Interview Prep" },
-          subject: "Your Password Reset OTP",
-          content: [{ type: "text/html", value: html }],
-        }),
-      });
+  if (!response.ok) {
+    throw new Error(
+      data.message || data.error || `HTTP ${response.status}: ${text}`
+    );
+  }
+  return data;
+};
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`SendGrid API failed: ${errorText}`);
-      }
-      console.log("OTP email sent successfully via SendGrid API");
-      return { success: true };
-    } catch (sgErr) {
-      console.error("SendGrid API error:", sgErr.message);
-      throw sgErr;
-    }
+// ── Provider 1: Brevo (free: 300 emails/day, no custom domain needed) ──
+const sendViaBrevo = async (toEmail, html) => {
+  const senderEmail = process.env.BREVO_SENDER_EMAIL;
+  if (!senderEmail) {
+    throw new Error(
+      "BREVO_SENDER_EMAIL is not set. It must be a sender address you verified in Brevo."
+    );
   }
 
-  // 3. Fallback to Gmail SMTP / Nodemailer (Works locally; blocked on Render Free Tier)
+  const data = await postJson(
+    "https://api.brevo.com/v3/smtp/email",
+    { "api-key": process.env.BREVO_API_KEY },
+    {
+      sender: { name: APP_NAME, email: senderEmail },
+      to: [{ email: toEmail }],
+      subject: SUBJECT,
+      htmlContent: html,
+    }
+  );
+
+  console.log("OTP email sent via Brevo:", data.messageId);
+  return data;
+};
+
+// ── Provider 2: Resend (free, but only delivers to other people once you
+//    verify your own domain and set RESEND_FROM to an address on it) ──
+const sendViaResend = async (toEmail, html) => {
+  const fromEmail = process.env.RESEND_FROM;
+  if (!fromEmail) {
+    console.warn(
+      "RESEND_FROM is not set: falling back to onboarding@resend.dev, which only delivers to your own Resend account email."
+    );
+  }
+
+  const data = await postJson(
+    "https://api.resend.com/emails",
+    { Authorization: `Bearer ${process.env.RESEND_API_KEY}` },
+    {
+      from: `${APP_NAME} <${fromEmail || "onboarding@resend.dev"}>`,
+      to: [toEmail],
+      subject: SUBJECT,
+      html,
+    }
+  );
+
+  console.log("OTP email sent via Resend:", data.id);
+  return data;
+};
+
+// ── Provider 3: Gmail SMTP (local development only; blocked on Render free) ──
+const sendViaGmailSmtp = async (toEmail, html) => {
   try {
     let gmailUser = process.env.MAIL_USER;
     let gmailPassword = process.env.MAIL_PASS;
@@ -114,16 +134,18 @@ const sendOTPEmail = async (toEmail, otp) => {
         );
       }
     } catch (dbErr) {
-      console.warn("Could not retrieve EmailConfig from DB, checking environment variables:", dbErr.message);
+      console.warn(
+        "Could not retrieve EmailConfig from DB, checking environment variables:",
+        dbErr.message
+      );
     }
 
     if (!gmailUser || !gmailPassword) {
       throw new Error(
-        "Gmail credentials not found. On Render Free Tier, SMTP (ports 465/587) is blocked. Add RESEND_API_KEY (recommended) or set MAIL_USER and MAIL_PASS."
+        "No email provider configured. Set BREVO_API_KEY + BREVO_SENDER_EMAIL (recommended), or RESEND_API_KEY + RESEND_FROM, or MAIL_USER + MAIL_PASS for local development."
       );
     }
 
-    // Configure Gmail SMTP with timeout limit
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -136,27 +158,32 @@ const sendOTPEmail = async (toEmail, otp) => {
     });
 
     const info = await transporter.sendMail({
-      from: {
-        name: "Smart Interview Prep",
-        address: gmailUser,
-      },
+      from: { name: APP_NAME, address: gmailUser },
       to: toEmail,
-      subject: "Your Password Reset OTP",
+      subject: SUBJECT,
       html,
     });
 
-    console.log("Gmail OTP sent successfully via SMTP:", info.messageId);
+    console.log("OTP email sent via Gmail SMTP:", info.messageId);
     return info;
-
   } catch (error) {
     if (error.code === "ETIMEDOUT" || error.message.includes("timeout")) {
       console.error(
-        "SMTP TIMEOUT DETECTED: Render Free Tier blocks outbound SMTP ports (25, 465, 587). Please use an HTTP email API like Resend (set RESEND_API_KEY) or upgrade Render plan."
+        "SMTP TIMEOUT: Render's free tier blocks outbound SMTP ports (25, 465, 587). Set BREVO_API_KEY and BREVO_SENDER_EMAIL instead."
       );
     }
-    console.error("GMAIL OTP ERROR:", error.message);
     throw error;
   }
+};
+
+// Uses the first provider that has credentials. A configured provider that
+// fails throws, so the route can report it instead of silently switching.
+const sendOTPEmail = async (toEmail, otp) => {
+  const html = getHtmlTemplate(otp);
+
+  if (process.env.BREVO_API_KEY) return sendViaBrevo(toEmail, html);
+  if (process.env.RESEND_API_KEY) return sendViaResend(toEmail, html);
+  return sendViaGmailSmtp(toEmail, html);
 };
 
 module.exports = { sendOTPEmail };
